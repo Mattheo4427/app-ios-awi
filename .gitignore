@@ -1,0 +1,16 @@
+# macOS system files
+.DS_Store
+
+# Xcode user-specific data
+xcuserdata/
+
+# Build artifacts
+/build/
+DerivedData/
+
+# Swift Package Manager
+/.swiftpm
+/.package.resolved
+
+# Archives
+*.xcarchive
