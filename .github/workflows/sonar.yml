@@ -30,7 +30,6 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=Mattheo4427_app-ios-awi
-            -Dsonar.organization=Mattheo4427
             -Dsonar.sources=.
             -Dsonar.java.binaries=.
             -Dsonar.scm.provider=git
