@@ -2,11 +2,7 @@ name: SonarCloud Analysis
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   sonarQube:
@@ -34,7 +30,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=Mattheo4427_app-ios-awi
-            -Dsonar.organization=mattheo4427
+            -Dsonar.organization=awi
             -Dsonar.sources=.
             -Dsonar.java.binaries=.
             -Dsonar.scm.provider=git
