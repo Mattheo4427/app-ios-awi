@@ -16,6 +16,7 @@ struct CreateManagerView: View {
     @State private var email = ""
     @State private var phone = ""
     @State private var address = ""
+    @State private var password = ""
     @State private var isAdmin = false // Toggle for admin role
 
     var body: some View {
@@ -26,7 +27,7 @@ struct CreateManagerView: View {
             TextField("Email", text: $email)
             TextField("Téléphone", text: $phone)
             TextField("Addresse", text: $address)
-            
+            SecureField("Mot de passe", text: $password)
             Toggle("Admin", isOn: $isAdmin)
 
             Button("Créer Manager") {

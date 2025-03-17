@@ -16,6 +16,7 @@ struct CreateSellerView: View {
     @State private var email = ""
     @State private var phone = ""
     @State private var address = ""
+    @State private var password = ""
 
     var body: some View {
         Form {
@@ -25,7 +26,8 @@ struct CreateSellerView: View {
             TextField("Email", text: $email)
             TextField("Téléphone", text: $phone)
             TextField("Addresse", text: $address)
-
+            SecureField("Mot de passe", text: $password)
+            
             Button("Créer Vendeur") {
                 Task {
                     let newSeller = Seller(

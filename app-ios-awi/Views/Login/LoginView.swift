@@ -44,7 +44,6 @@ struct LoginView: View {
                                 Image(systemName: viewModel.isPasswordSecure ? "eye.fill" : "eye.slash.fill")
                                     .foregroundColor(.gray)
                             }
-                            .padding(.trailing, 10)
                         }
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.gray, lineWidth: 1))
