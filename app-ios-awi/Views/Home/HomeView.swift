@@ -7,29 +7,83 @@
 
 import SwiftUI
 
-
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
         NavigationView {
-            VStack {
+            ZStack {
                 if viewModel.isLoading {
                     ProgressView("Chargement du catalogue...")
                 } else if let errorMessage = viewModel.errorMessage {
-                    Text("Erreur : \(errorMessage)")
-                        .foregroundColor(.red)
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.orange)
+                            .padding()
+                        
+                        Text("Erreur")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        Text(errorMessage)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.top, 4)
+                    }
+                    .padding()
+                } else if viewModel.categories.isEmpty && viewModel.games.isEmpty {
+                    VStack {
+                        Image(systemName: "book.closed")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
+                            .padding()
+                        
+                        Text("Catalogue vide")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        Text("Aucun jeu ou catégorie n'est disponible pour le moment.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.top, 4)
+                        
+                        Button(action: {
+                            Task {
+                                await viewModel.fetchCatalogue()
+                            }
+                        }) {
+                            Text("Actualiser")
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                        .padding(.top, 16)
+                    }
+                    .padding()
                 } else {
                     List {
-                        Section(header: Text("Catégories")) {
-                            ForEach(viewModel.categories, id: \.id) { category in
-                                Text(category.name)
+                        if !viewModel.categories.isEmpty {
+                            Section(header: Text("Catégories")) {
+                                ForEach(viewModel.categories, id: \.id) { category in
+                                    Text(category.name)
+                                }
                             }
                         }
                         
-                        Section(header: Text("Jeux")) {
-                            ForEach(viewModel.games, id: \.id) { game in
-                                Text(game.tag) // Adjusted to use the correct property
+                        if !viewModel.games.isEmpty {
+                            Section(header: Text("Jeux")) {
+                                ForEach(viewModel.games, id: \.id) { game in
+                                    Text(game.tag) // Adjusted to use the correct property
+                                }
                             }
                         }
                     }

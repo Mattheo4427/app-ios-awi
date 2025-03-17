@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @State private var selectedTab = 0
+    @State private var selectedSubTab: String? = nil
     @State private var expandedMenu: TabItem? = nil
     
     // Define all tab items
@@ -50,11 +51,40 @@ struct TabBarView: View {
                 case 0:
                     HomeView()
                 case 1:
-                    PlaceholderView(title: "Utilisateurs")
+                    if selectedSubTab == "Clients" {
+                        ClientsListView()
+                    } else if selectedSubTab == "Managers" {
+                        ManagersListView()
+                    } else if selectedSubTab == "Vendeurs" {
+                        SellersListView()
+                    } else {
+                        PlaceholderView(title: "Utilisateurs")
+                    }
+                /*
+                 TODO : ADD ALL THOSE VIEWS
                 case 2:
-                    PlaceholderView(title: "Jeux")
+                    if selectedSubTab == "Jeux" {
+                        GamesListView()
+                    } else if selectedSubTab == "Editeurs" {
+                        PublishersListView()
+                    } else if selectedSubTab == "Catégories" {
+                        CategoriesListView()
+                    } else {
+                        PlaceholderView(title: "Jeux")
+                    }
                 case 3:
-                    PlaceholderView(title: "Transactions")
+                    if selectedSubTab == "Dépôts" {
+                        DepositsListView()
+                    } else if selectedSubTab == "Ventes" {
+                        SalesListView()
+                    } else if selectedSubTab == "Retraits" {
+                        WithdrawalsListView()
+                    } else if selectedSubTab == "Bilan" {
+                        BalanceView()
+                    } else {
+                        PlaceholderView(title: "Transactions")
+                    }
+                 */
                 case 4:
                     PlaceholderView(title: "Sessions")
                 case 5:
@@ -86,6 +116,7 @@ struct TabBarView: View {
                     VStack(spacing: 12) {
                         ForEach(menu.items, id: \.title) { item in
                             ExpandableTabButton(icon: item.icon, text: item.title) {
+                                selectedSubTab = item.title  // Set the selected sub tab
                                 print("\(item.title) tapped")
                                 withAnimation(.spring()) {
                                     expandedMenu = nil
@@ -114,6 +145,7 @@ struct TabBarView: View {
                     } else {
                         withAnimation {
                             selectedTab = index
+                            selectedSubTab = nil  // Reset selected sub tab when changing tabs
                             // Close any open menu when switching tabs
                             expandedMenu = nil
                         }
@@ -159,7 +191,6 @@ struct TabBarView: View {
         return expandableMenus.keys.contains(name)
     }
     
-    // Toggle expandable menu
     private func toggleMenu(name: String) {
         withAnimation(.spring()) {
             if expandedMenu?.name == name {
@@ -167,6 +198,7 @@ struct TabBarView: View {
             } else {
                 if let items = expandableMenus[name] {
                     expandedMenu = TabItem(name: name, items: items)
+                    selectedTab = tabItems.firstIndex(where: { $0.0 == name }) ?? selectedTab
                 }
             }
         }
