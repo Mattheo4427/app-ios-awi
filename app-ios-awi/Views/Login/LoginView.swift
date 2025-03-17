@@ -29,25 +29,27 @@ struct LoginView: View {
                         .padding(.horizontal)
 
                     HStack {
-                        if viewModel.isPasswordSecure {
-                            SecureField("Password", text: $viewModel.password)
-                                .padding()
-                                .background(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.gray, lineWidth: 1))
-                                .padding(.horizontal)
-                        } else {
-                            TextField("Password", text: $viewModel.password)
-                                .padding()
-                                .background(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.gray, lineWidth: 1))
-                                .padding(.horizontal)
+                        ZStack(alignment: .trailing) {
+                            if viewModel.isPasswordSecure {
+                                SecureField("Password", text: $viewModel.password)
+                                    .padding(.trailing, 40) // Give space for the eye icon
+                            } else {
+                                TextField("Password", text: $viewModel.password)
+                                    .padding(.trailing, 40) // Give space for the eye icon
+                            }
+                            
+                            Button(action: {
+                                viewModel.isPasswordSecure.toggle()
+                            }) {
+                                Image(systemName: viewModel.isPasswordSecure ? "eye.fill" : "eye.slash.fill")
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.trailing, 10)
                         }
-
-                        Button(action: {
-                            viewModel.isPasswordSecure.toggle()
-                        }) {
-                            Image(systemName: viewModel.isPasswordSecure ? "eye.fill" : "eye.slash.fill")
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.trailing, 12)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.gray, lineWidth: 1))
+                        .padding(.horizontal)
+                        
                     }
 
                     // Display Backend Error Message
