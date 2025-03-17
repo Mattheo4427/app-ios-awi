@@ -12,32 +12,72 @@ class LoginViewModel: ObservableObject {
     @Published var password = ""
     @Published var isPasswordSecure = true
     @Published var showErrorMessage = false
+    @Published var errorMessage: String = ""  // Store backend error message
     @Published var isLoading = false
+    @Published var loginSuccess = false
     
+    private let loginURL = "http://mdaf-awibackend.cluster-ig4.igpolytech.fr/auth/login"
+
     func validateCredentials() -> Bool {
-        // A simple check to make sure email and password are non-empty
-        if email.isEmpty || password.isEmpty || !email.contains("@") {
-            return false
-        }
-        return true
+        return !email.isEmpty && !password.isEmpty && email.contains("@")
     }
 
-    func login() {
-        // Trigger loading state
-        isLoading = true
-        showErrorMessage = false
-
-        // Here you can add your API request or login logic
-        // For simplicity, we just simulate a delay to represent login logic
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.isLoading = false
-            if self.validateCredentials() {
-                // Handle successful login logic
-                print("Login successful")
-            } else {
-                // Handle failed login logic
+    func login() async {
+        guard validateCredentials() else {
+            DispatchQueue.main.async {
                 self.showErrorMessage = true
+                self.errorMessage = "Please enter a valid email and password."
+            }
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.isLoading = true
+            self.showErrorMessage = false
+        }
+
+        let parameters = ["email": email, "password": password]
+        guard let jsonData = try? JSONEncoder().encode(parameters) else {
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.showErrorMessage = true
+                self.errorMessage = "Failed to encode request data."
+            }
+            return
+        }
+
+        do {
+            let data = try await fetchData(from: loginURL, method: "POST", body: jsonData)
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let response = decodeJSON(from: data, as: LoginResponse.self) {
+                    self.loginSuccess = true
+                    print("Login successful: \(response.token)")
+                } else if let errorResponse = decodeJSON(from: data, as: ErrorResponse.self) {
+                    self.showErrorMessage = true
+                    self.errorMessage = errorResponse.message
+                } else {
+                    self.showErrorMessage = true
+                    self.errorMessage = "Unknown error occurred."
+                }
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.showErrorMessage = true
+                self.errorMessage = "Network error: \(error.localizedDescription)"
             }
         }
     }
+}
+
+// Structs to handle responses
+struct LoginResponse: Decodable {
+    let token: String
+}
+
+struct ErrorResponse: Decodable {
+    let message: String
 }
