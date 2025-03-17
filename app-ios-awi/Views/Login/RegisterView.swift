@@ -133,3 +133,9 @@ struct RegisterView: View {
         return true
     }
 }
+
+struct RegisterView_Previews: PreviewProvider {
+    static var previews: some View {
+        RegisterView()
+    }
+}
