@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     
@@ -21,14 +22,14 @@ struct HomeView: View {
                 } else {
                     List {
                         Section(header: Text("Catégories")) {
-                            ForEach(viewModel.categories, id: \._id) { category in
+                            ForEach(viewModel.categories, id: \.id) { category in
                                 Text(category.name)
                             }
                         }
                         
                         Section(header: Text("Jeux")) {
-                            ForEach(viewModel.games, id: \._id) { game in
-                                Text(game.name)
+                            ForEach(viewModel.games, id: \.id) { game in
+                                Text(game.tag) // Adjusted to use the correct property
                             }
                         }
                     }
@@ -49,15 +50,3 @@ struct HomeView_Previews: PreviewProvider {
         HomeView()
     }
 }
-
-// MARK: - Models
-struct Game: Codable {
-    let _id: String
-    let name: String
-}
-
-struct GameCategory: Codable {
-    let _id: String
-    let name: String
-}
-
