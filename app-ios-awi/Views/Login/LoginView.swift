@@ -11,7 +11,7 @@ struct LoginView: View {
     @StateObject var viewModel = LoginViewModel()  // Initialize ViewModel
 
     var body: some View {
-        NavigationView {  // Make sure you're inside a NavigationView for NavigationLink to work
+        NavigationView {
             VStack {
                 Text("Login")
                     .font(.largeTitle)
@@ -21,7 +21,6 @@ struct LoginView: View {
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 20) {
-                    // Email TextField
                     TextField("Email", text: $viewModel.email)
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.gray, lineWidth: 1))
@@ -29,7 +28,6 @@ struct LoginView: View {
                         .autocapitalization(.none)
                         .padding(.horizontal)
 
-                    // Password TextField
                     HStack {
                         if viewModel.isPasswordSecure {
                             SecureField("Password", text: $viewModel.password)
@@ -52,39 +50,53 @@ struct LoginView: View {
                         .padding(.trailing, 12)
                     }
 
-                    // Error message (if any)
+                    // Display Backend Error Message
                     if viewModel.showErrorMessage {
-                        Text("Invalid email or password")
+                        Text(viewModel.errorMessage)
                             .foregroundColor(.red)
                             .font(.footnote)
                             .padding(.horizontal)
                     }
 
-                    // Login Button
                     Button(action: {
-                        viewModel.login()
+                        Task {
+                            await viewModel.login()
+                        }
                     }) {
-                        Text("Login")
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                            .padding(.horizontal)
+                      if viewModel.isLoading {
+                            ProgressView()
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.gray.opacity(0.5))
+                                .cornerRadius(10)
+                                .padding(.horizontal)
+                        } else {
+                            Text("Login")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                                .padding(.horizontal)
+                        }
                     }
+                    .disabled(viewModel.isLoading)
                 }
                 Spacer()
             }
             .navigationBarBackButtonHidden(true)
             .padding(.horizontal)
             .onTapGesture {
-                // Dismiss keyboard when tapping outside
                 UIApplication.shared.endEditing()
+            }
+            .fullScreenCover(isPresented: $viewModel.loginSuccess) {
+                HomeView()
             }
         }
     }
 }
+
 
 // Helper to dismiss the keyboard
 extension UIApplication {
