@@ -13,30 +13,30 @@ struct TabBarView: View {
     
     // Define all tab items
     private let tabItems = [
-        ("Home", "house"),
-        ("Users", "person.3.fill"),
-        ("Games", "gamecontroller.fill"),
+        ("Catalogue", "house"),
+        ("Utilisateurs", "person.3.fill"),
+        ("Jeux", "gamecontroller.fill"),
         ("Transactions", "creditcard.fill"),
         ("Sessions", "clock.fill"),
-        ("Login", "person.circle")
+        ("Connexion", "person.circle")
     ]
     
     // Define expandable menus
     private let expandableMenus: [String: [TabItem.MenuItem]] = [
-        "Users": [
+        "Utilisateurs": [
             TabItem.MenuItem(icon: "person.fill", title: "Clients"),
-            TabItem.MenuItem(icon: "cart.fill", title: "Sellers"),
+            TabItem.MenuItem(icon: "cart.fill", title: "Vendeurs"),
             TabItem.MenuItem(icon: "briefcase.fill", title: "Managers")
         ],
-        "Games": [
-            TabItem.MenuItem(icon: "gamecontroller", title: "Games"),
-            TabItem.MenuItem(icon: "paintbrush", title: "Editors"),
-            TabItem.MenuItem(icon: "list.bullet", title: "Categories")
+        "Jeux": [
+            TabItem.MenuItem(icon: "gamecontroller", title: "Jeux"),
+            TabItem.MenuItem(icon: "paintbrush", title: "Editeurs"),
+            TabItem.MenuItem(icon: "list.bullet", title: "Catégories")
         ],
         "Transactions": [
-            TabItem.MenuItem(icon: "dollarsign.circle", title: "Deposits"),
-            TabItem.MenuItem(icon: "bag.fill", title: "Sales"),
-            TabItem.MenuItem(icon: "arrow.down.circle", title: "Withdrawals"),
+            TabItem.MenuItem(icon: "dollarsign.circle", title: "Dépôts"),
+            TabItem.MenuItem(icon: "bag.fill", title: "Ventes"),
+            TabItem.MenuItem(icon: "arrow.down.circle", title: "Retraits"),
             TabItem.MenuItem(icon: "chart.bar", title: "Bilan")
         ]
     ]
@@ -50,9 +50,9 @@ struct TabBarView: View {
                 case 0:
                     HomeView()
                 case 1:
-                    PlaceholderView(title: "Users")
+                    PlaceholderView(title: "Utilisateurs")
                 case 2:
-                    PlaceholderView(title: "Games")
+                    PlaceholderView(title: "Jeux")
                 case 3:
                     PlaceholderView(title: "Transactions")
                 case 4:

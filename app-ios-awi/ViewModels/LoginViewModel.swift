@@ -26,7 +26,7 @@ class LoginViewModel: ObservableObject {
         guard validateCredentials() else {
             DispatchQueue.main.async {
                 self.showErrorMessage = true
-                self.errorMessage = "Please enter a valid email and password."
+                self.errorMessage = "Entrez un email et mot de passe valides."
             }
             return
         }
@@ -41,7 +41,7 @@ class LoginViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.isLoading = false
                 self.showErrorMessage = true
-                self.errorMessage = "Failed to encode request data."
+                self.errorMessage = "Erreur lors de l'encodage des données."
             }
             return
         }
@@ -60,14 +60,14 @@ class LoginViewModel: ObservableObject {
                     self.errorMessage = errorResponse.message
                 } else {
                     self.showErrorMessage = true
-                    self.errorMessage = "Unknown error occurred."
+                    self.errorMessage = "Erreur inconnue."
                 }
             }
         } catch {
             DispatchQueue.main.async {
                 self.isLoading = false
                 self.showErrorMessage = true
-                self.errorMessage = "Network error: \(error.localizedDescription)"
+                self.errorMessage = "Erreur réseau: \(error.localizedDescription)"
             }
         }
     }
