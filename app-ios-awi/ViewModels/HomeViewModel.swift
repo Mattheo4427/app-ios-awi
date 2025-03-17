@@ -9,39 +9,28 @@ import Foundation
 
 class HomeViewModel: ObservableObject {
     @Published var games: [DepositedGame] = []
+    @Published var categories: [GameCategory] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
-    let apiURL = ""
-    
-    func fetchGames() async {
-        // Set loading state to true, this needs to be on the main thread
+
+    func fetchCatalogue() async {
         DispatchQueue.main.async {
             self.isLoading = true
             self.errorMessage = nil
         }
-        
+
+        async let gamesData = fetchData(from: "game")
+        async let categoriesData = fetchData(from: "game-category")
+
         do {
-            // Fetch data asynchronously
-            if let data = try await fetchData(from: apiURL), let decodedGames: [DepositedGame] = decodeJSON(from: data, as: [DepositedGame].self) {
-                // Set the games data on the main thread
-                DispatchQueue.main.async {
-                    self.games = decodedGames
-                }
-            } else {
-                // Handle the error message on the main thread
-                DispatchQueue.main.async {
-                    self.errorMessage = "Failed to load games."
-                }
-            }
+            games = decodeJSON(from: try await gamesData, as: [DepositedGame].self) ?? []
+            categories = decodeJSON(from: try await categoriesData, as: [GameCategory].self) ?? []
         } catch {
-            // Handle any errors on the main thread
             DispatchQueue.main.async {
-                self.errorMessage = "Error: \(error.localizedDescription)"
+                self.errorMessage = "Impossible de charger le catalogue."
             }
         }
-        
-        // Set loading state to false on the main thread after fetching
+
         DispatchQueue.main.async {
             self.isLoading = false
         }

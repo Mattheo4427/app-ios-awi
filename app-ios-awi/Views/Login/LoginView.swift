@@ -63,7 +63,7 @@ struct LoginView: View {
                             await viewModel.login()
                         }
                     }) {
-                        if viewModel.isLoading {
+                      if viewModel.isLoading {
                             ProgressView()
                                 .padding()
                                 .frame(maxWidth: .infinity)
@@ -82,7 +82,6 @@ struct LoginView: View {
                         }
                     }
                     .disabled(viewModel.isLoading)
-
                 }
                 Spacer()
             }
