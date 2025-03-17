@@ -7,34 +7,23 @@
 
 import Foundation
 
-/* USES for GET, POST, PUT, DELETE
- 
- fetchData(from: "https://api.example.com/items") { data in
-     // Handle response
- }
- 
- let jsonData = try? JSONEncoder().encode(["name": "John Doe"])
- fetchData(from: "https://api.example.com/users", method: "POST", body: jsonData) { data in
-     // Handle response
- }
 
- let updatedData = try? JSONEncoder().encode(["name": "Updated Name"])
- fetchData(from: "https://api.example.com/users/1", method: "PUT", body: updatedData) { data in
-     // Handle response
- }
-
- fetchData(from: "https://api.example.com/users/1", method: "DELETE") { data in
-     // Handle response
- }
-
- */
-func fetchData(from urlString: String, method: String = "GET", body: Data? = nil) async throws -> Data? {
-    guard let url = URL(string: urlString) else {
+func fetchData(from urlPath: String, reqMethod: String = "GET", body: Data? = nil) async throws -> Data? {
+    let urlBack = "http://mdaf-awibackend.cluster-ig4.igpolytech.fr/"
+    
+    guard let url = URL(string: urlBack + urlPath) else {
         throw URLError(.badURL)
     }
     
     var request = URLRequest(url: url)
-    request.httpMethod = method
+    
+    let validMethods = ["GET", "POST", "PUT", "DELETE"]
+    
+    guard validMethods.contains(reqMethod.uppercased()) else {
+            throw URLError(.badServerResponse)
+    }
+    
+    request.httpMethod = reqMethod.uppercased()
     request.httpBody = body
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     

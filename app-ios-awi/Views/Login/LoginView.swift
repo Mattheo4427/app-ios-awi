@@ -73,18 +73,6 @@ struct LoginView: View {
                             .cornerRadius(10)
                             .padding(.horizontal)
                     }
-
-                    // Register Link
-                    NavigationLink(destination: RegisterView()) {
-                        HStack {
-                            Spacer()
-                            Text("Don't have an account? Register")
-                                .font(.footnote)
-                                .foregroundColor(.blue)
-                            Spacer()
-                        }
-                            .padding(.top, 10)
-                    }
                 }
                 Spacer()
             }
