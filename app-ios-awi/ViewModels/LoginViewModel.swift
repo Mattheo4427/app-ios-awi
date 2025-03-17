@@ -12,11 +12,11 @@ class LoginViewModel: ObservableObject {
     @Published var password = ""
     @Published var isPasswordSecure = true
     @Published var showErrorMessage = false
-    @Published var errorMessage: String = ""  // Store backend error message
+    @Published var errorMessage: String = ""
     @Published var isLoading = false
     @Published var loginSuccess = false
     
-    private let loginURL = "http://mdaf-awibackend.cluster-ig4.igpolytech.fr/auth/login"
+    private let loginURL = "auth/login"
 
     func validateCredentials() -> Bool {
         return !email.isEmpty && !password.isEmpty && email.contains("@")
