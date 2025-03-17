@@ -16,7 +16,7 @@ class LoginViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var loginSuccess = false
     
-    private let loginURL = "auth/login"
+    private let urlPath = "auth/login"
 
     func validateCredentials() -> Bool {
         return !email.isEmpty && !password.isEmpty && email.contains("@")
@@ -47,7 +47,7 @@ class LoginViewModel: ObservableObject {
         }
 
         do {
-            let data = try await fetchData(from: loginURL, method: "POST", body: jsonData)
+            let data = try await fetchData(from: urlPath, reqMethod: "POST", body: jsonData)
             
             DispatchQueue.main.async {
                 self.isLoading = false
