@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 class ClientViewModel: ObservableObject {
     @Published var clients: [Client] = []
-    private let endpoint = "clients"
+    private let endpoint = "clients/"
 
     // Fetch all clients
     func fetchClients() async {

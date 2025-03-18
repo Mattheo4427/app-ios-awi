@@ -16,7 +16,7 @@ class LoginViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var loginSuccess = false
     
-    private let urlPath = "auth/login"
+    private let urlPath = "auth/login/"
 
     func validateCredentials() -> Bool {
         return !email.isEmpty && !password.isEmpty && email.contains("@")

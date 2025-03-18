@@ -60,18 +60,18 @@ struct TabBarView: View {
                     } else {
                         PlaceholderView(title: "Utilisateurs")
                     }
-                /*
-                 TODO : ADD ALL THOSE VIEWS
                 case 2:
                     if selectedSubTab == "Jeux" {
                         GamesListView()
                     } else if selectedSubTab == "Editeurs" {
-                        PublishersListView()
+                        GameEditorsListView()
                     } else if selectedSubTab == "Catégories" {
-                        CategoriesListView()
+                        GameCategoriesListView()
                     } else {
                         PlaceholderView(title: "Jeux")
                     }
+                /*
+                TODO : ADD ALL THOSE VIEWS
                 case 3:
                     if selectedSubTab == "Dépôts" {
                         DepositsListView()
@@ -251,7 +251,7 @@ struct PlaceholderView: View {
                 .font(.title)
                 .fontWeight(.medium)
             
-            Text("Select an option from the menu")
+            Text("Sélectionnez une option du menu")
                 .font(.subheadline)
                 .foregroundColor(.gray)
         }

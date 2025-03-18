@@ -8,9 +8,9 @@
 import Foundation
 
 struct GameCategory: Identifiable, Codable {
-    let tag: String
-    let name: String
-    let description: String
-    
-    var id: String { tag }
+    let id_category: Int
+    var name: String
+    var description: String?
+
+    var id: Int { id_category }
 }
