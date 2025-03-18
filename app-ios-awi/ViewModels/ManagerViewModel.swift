@@ -9,7 +9,7 @@ import Foundation
 @MainActor
 class ManagerViewModel: ObservableObject {
     @Published var managers: [Manager] = []
-    private let endpoint = "managers"
+    private let endpoint = "managers/"
 
     // Fetch all managers
     func fetchManagers() async {

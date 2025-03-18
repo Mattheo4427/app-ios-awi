@@ -13,7 +13,7 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Text("Login")
+                Text("Connexion")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.top, 50)
@@ -31,10 +31,10 @@ struct LoginView: View {
                     HStack {
                         ZStack(alignment: .trailing) {
                             if viewModel.isPasswordSecure {
-                                SecureField("Password", text: $viewModel.password)
+                                SecureField("Mot de passe", text: $viewModel.password)
                                     .padding(.trailing, 40) // Give space for the eye icon
                             } else {
-                                TextField("Password", text: $viewModel.password)
+                                TextField("Mot de passe", text: $viewModel.password)
                                     .padding(.trailing, 40) // Give space for the eye icon
                             }
                             
@@ -72,7 +72,7 @@ struct LoginView: View {
                                 .cornerRadius(10)
                                 .padding(.horizontal)
                         } else {
-                            Text("Login")
+                            Text("Connexion")
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                                 .padding()

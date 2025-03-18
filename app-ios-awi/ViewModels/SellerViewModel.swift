@@ -9,7 +9,7 @@ import Foundation
 @MainActor
 class SellerViewModel: ObservableObject {
     @Published var sellers: [Seller] = []
-    private let endpoint = "sellers"
+    private let endpoint = "sellers/"
 
     // Fetch all sellers
     func fetchSellers() async {
