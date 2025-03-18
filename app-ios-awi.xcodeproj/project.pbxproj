@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		1D41349C2D888C9F008A0A05 /* GameCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D41349B2D888C9F008A0A05 /* GameCategory.swift */; };
+		B7172B212D897CE400727D2C /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B202D897CE400727D2C /* Session.swift */; };
+		B7172B242D897DED00727D2C /* SessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B232D897DED00727D2C /* SessionViewModel.swift */; };
+		B7172B262D897E0D00727D2C /* SessionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B252D897E0D00727D2C /* SessionsListView.swift */; };
+		B7172B282D897E1D00727D2C /* CreateSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B272D897E1D00727D2C /* CreateSessionView.swift */; };
+		B7172B2A2D897E2A00727D2C /* UpdateSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B292D897E2A00727D2C /* UpdateSessionView.swift */; };
 		B719CBDD2D81A85F002E4579 /* app_ios_awiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B719CBDC2D81A85F002E4579 /* app_ios_awiApp.swift */; };
 		B719CBE12D81A861002E4579 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B719CBE02D81A861002E4579 /* Assets.xcassets */; };
 		B719CBE42D81A861002E4579 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B719CBE32D81A861002E4579 /* Preview Assets.xcassets */; };
@@ -52,6 +57,11 @@
 
 /* Begin PBXFileReference section */
 		1D41349B2D888C9F008A0A05 /* GameCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCategory.swift; sourceTree = "<group>"; };
+		B7172B202D897CE400727D2C /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Session.swift; path = ../../../../../Session.swift; sourceTree = "<group>"; };
+		B7172B232D897DED00727D2C /* SessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewModel.swift; sourceTree = "<group>"; };
+		B7172B252D897E0D00727D2C /* SessionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsListView.swift; sourceTree = "<group>"; };
+		B7172B272D897E1D00727D2C /* CreateSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSessionView.swift; sourceTree = "<group>"; };
+		B7172B292D897E2A00727D2C /* UpdateSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateSessionView.swift; sourceTree = "<group>"; };
 		B719CBD92D81A85F002E4579 /* app-ios-awi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "app-ios-awi.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B719CBDC2D81A85F002E4579 /* app_ios_awiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = app_ios_awiApp.swift; sourceTree = "<group>"; };
 		B719CBE02D81A861002E4579 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -106,6 +116,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B7172B222D897DB300727D2C /* Sessions */ = {
+			isa = PBXGroup;
+			children = (
+				B7172B252D897E0D00727D2C /* SessionsListView.swift */,
+				B7172B272D897E1D00727D2C /* CreateSessionView.swift */,
+				B7172B292D897E2A00727D2C /* UpdateSessionView.swift */,
+			);
+			path = Sessions;
+			sourceTree = "<group>";
+		};
 		B719CBD02D81A85F002E4579 = {
 			isa = PBXGroup;
 			children = (
@@ -238,6 +258,7 @@
 		B78265092D85C721008D79E5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B7172B222D897DB300727D2C /* Sessions */,
 				B76988D72D89612200D0712C /* GameEditors */,
 				B76988D62D89610400D0712C /* GameCategories */,
 				B76988D52D8960FB00D0712C /* Games */,
@@ -262,6 +283,7 @@
 				B76988D82D89617200D0712C /* GameViewModel.swift */,
 				B76988DA2D89618100D0712C /* GameEditorViewModel.swift */,
 				B76988DC2D89619A00D0712C /* GameCategoryViewModel.swift */,
+				B7172B232D897DED00727D2C /* SessionViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -286,6 +308,7 @@
 				B73A35B22D88ACD800F0F3BD /* Client.swift */,
 				B76988DE2D8961A900D0712C /* Game.swift */,
 				B76988E02D8961B400D0712C /* GameEditor.swift */,
+				B7172B202D897CE400727D2C /* Session.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -389,10 +412,13 @@
 				B78265162D85CDCD008D79E5 /* ManagerDTO.swift in Sources */,
 				B73A35B32D88ACD800F0F3BD /* Client.swift in Sources */,
 				B76988E52D89624700D0712C /* GameCategoriesListView.swift in Sources */,
+				B7172B242D897DED00727D2C /* SessionViewModel.swift in Sources */,
 				B73A35B12D88ACCD00F0F3BD /* Seller.swift in Sources */,
 				B73A35C72D88B48400F0F3BD /* UpdateManagerView.swift in Sources */,
 				B73A35C12D88B44300F0F3BD /* CreateSellerView.swift in Sources */,
+				B7172B212D897CE400727D2C /* Session.swift in Sources */,
 				B76988DF2D8961A900D0712C /* Game.swift in Sources */,
+				B7172B282D897E1D00727D2C /* CreateSessionView.swift in Sources */,
 				B73A35BF2D88B43300F0F3BD /* SellersListView.swift in Sources */,
 				B7BEEF522D89638500916560 /* CreateGameEditorView.swift in Sources */,
 				B7BEEF4E2D89636400916560 /* CreateGameCategoryView.swift in Sources */,
@@ -401,12 +427,14 @@
 				B78265122D85CD90008D79E5 /* ManagerViewModel.swift in Sources */,
 				B73A35BB2D88AFAD00F0F3BD /* UpdateClientView.swift in Sources */,
 				B7BEEF4A2D89632C00916560 /* GamesListView.swift in Sources */,
+				B7172B2A2D897E2A00727D2C /* UpdateSessionView.swift in Sources */,
 				B73A35B72D88AF8C00F0F3BD /* ClientsListView.swift in Sources */,
 				B76988E32D89623600D0712C /* GameEditorsListView.swift in Sources */,
 				B78265182D85CDD6008D79E5 /* Manager.swift in Sources */,
 				B75680472D88278300A72D43 /* HomeView.swift in Sources */,
 				B7BEEF562D8963B000916560 /* UpdateGameCategoryView.swift in Sources */,
 				B719CBDD2D81A85F002E4579 /* app_ios_awiApp.swift in Sources */,
+				B7172B262D897E0D00727D2C /* SessionsListView.swift in Sources */,
 				B7BEEF582D8963F100916560 /* UpdateGameView.swift in Sources */,
 				B73A35C32D88B44E00F0F3BD /* UpdateSellerView.swift in Sources */,
 				B76988DD2D89619A00D0712C /* GameCategoryViewModel.swift in Sources */,
