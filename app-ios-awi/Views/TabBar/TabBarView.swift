@@ -44,7 +44,6 @@ struct TabBarView: View {
     
     var body: some View {
         ZStack {
-            // Content based on selected tab
             VStack {
                 Spacer()
                 switch selectedTab {
@@ -70,8 +69,6 @@ struct TabBarView: View {
                     } else {
                         PlaceholderView(title: "Jeux", icon: "gamecontroller.fill")
                     }
-                /*
-                TODO : ADD ALL THOSE VIEWS
                 case 3:
                     if selectedSubTab == "Dépôts" {
                         DepositsListView()
@@ -81,10 +78,10 @@ struct TabBarView: View {
                         WithdrawalsListView()
                     } else if selectedSubTab == "Bilan" {
                         BalanceView()
-                    } else {
+                    }
+                    else {
                         PlaceholderView(title: "Transactions", icon: "creditcard.fill")
                     }
-                 */
                 case 4:
                     SessionsListView()
                 case 5:

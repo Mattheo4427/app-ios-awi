@@ -17,11 +17,11 @@ struct UpdateSessionView: View {
             TextField("Nom de la session", text: $session.name)
             DatePicker("Date de début", selection: $session.date_begin, displayedComponents: .date)
             DatePicker("Date de fin", selection: $session.date_end, displayedComponents: .date)
-            TextField("Frais de dépôt", value: $session.deposit_fees, format: .number)
+            TextField("Frais de dépôt ($)", value: $session.deposit_fees, format: .number)
                 .keyboardType(.decimalPad)
-            TextField("Remise", value: $session.discount, format: .number)
+            TextField("Remise (%)", value: $session.discount, format: .number)
                 .keyboardType(.decimalPad)
-            TextField("Frais de commission", value: $session.commission_fees, format: .number)
+            TextField("Frais de commission ($)", value: $session.commission_fees, format: .number)
                 .keyboardType(.decimalPad)
 
             Button("Modifier Session") {
