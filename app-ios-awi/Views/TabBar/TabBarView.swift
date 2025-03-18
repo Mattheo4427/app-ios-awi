@@ -18,7 +18,7 @@ struct TabBarView: View {
         ("Utilisateurs", "person.3.fill"),
         ("Jeux", "gamecontroller.fill"),
         ("Transactions", "creditcard.fill"),
-        ("Sessions", "clock.fill"),
+        ("Sessions", "calendar.badge.exclamationmark"),
         ("Connexion", "person.circle")
     ]
     
@@ -31,7 +31,7 @@ struct TabBarView: View {
         ],
         "Jeux": [
             TabItem.MenuItem(icon: "gamecontroller", title: "Jeux"),
-            TabItem.MenuItem(icon: "paintbrush", title: "Editeurs"),
+            TabItem.MenuItem(icon: "person.2.fill", title: "Editeurs"),
             TabItem.MenuItem(icon: "list.bullet", title: "Catégories")
         ],
         "Transactions": [
@@ -58,7 +58,7 @@ struct TabBarView: View {
                     } else if selectedSubTab == "Vendeurs" {
                         SellersListView()
                     } else {
-                        PlaceholderView(title: "Utilisateurs")
+                        PlaceholderView(title: "Utilisateurs", icon: "person.3.fill")
                     }
                 case 2:
                     if selectedSubTab == "Jeux" {
@@ -68,7 +68,7 @@ struct TabBarView: View {
                     } else if selectedSubTab == "Catégories" {
                         GameCategoriesListView()
                     } else {
-                        PlaceholderView(title: "Jeux")
+                        PlaceholderView(title: "Jeux", icon: "gamecontroller.fill")
                     }
                 /*
                 TODO : ADD ALL THOSE VIEWS
@@ -82,7 +82,7 @@ struct TabBarView: View {
                     } else if selectedSubTab == "Bilan" {
                         BalanceView()
                     } else {
-                        PlaceholderView(title: "Transactions")
+                        PlaceholderView(title: "Transactions", icon: "creditcard.fill")
                     }
                  */
                 case 4:
@@ -238,10 +238,11 @@ struct ExpandableTabButton: View {
 // Placeholder View
 struct PlaceholderView: View {
     var title: String
+    var icon: String
     
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: "cube.box.fill")
+            Image(systemName: icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 80, height: 80)

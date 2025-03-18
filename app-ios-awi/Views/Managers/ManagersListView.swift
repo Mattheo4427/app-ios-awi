@@ -15,7 +15,7 @@ struct ManagersListView: View {
             ZStack {
                 if viewModel.managers.isEmpty {
                     VStack {
-                        Image(systemName: "briefcase.slash")
+                        Image(systemName: "briefcase.fill")
                             .font(.system(size: 50))
                             .foregroundColor(.gray)
                             .padding()

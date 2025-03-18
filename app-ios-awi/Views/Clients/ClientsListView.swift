@@ -15,7 +15,7 @@ struct ClientsListView: View {
             ZStack {
                 if viewModel.clients.isEmpty {
                     VStack {
-                        Image(systemName: "person.slash")
+                        Image(systemName: "person.fill")
                             .font(.system(size: 50))
                             .foregroundColor(.gray)
                             .padding()

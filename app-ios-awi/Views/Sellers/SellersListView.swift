@@ -15,7 +15,7 @@ struct SellersListView: View {
             ZStack {
                 if viewModel.sellers.isEmpty {
                     VStack {
-                        Image(systemName: "cart.slash")
+                        Image(systemName: "cart.fill")
                             .font(.system(size: 50))
                             .foregroundColor(.gray)
                             .padding()
