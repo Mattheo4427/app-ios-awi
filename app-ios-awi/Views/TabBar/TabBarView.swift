@@ -86,7 +86,7 @@ struct TabBarView: View {
                     }
                  */
                 case 4:
-                    PlaceholderView(title: "Sessions")
+                    SessionsListView()
                 case 5:
                     LoginView()
                 default:
