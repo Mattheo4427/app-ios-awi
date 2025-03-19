@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @State private var selectedTab = 0
+    @State private var highlightedTab = 0
     @State private var selectedSubTab: String? = nil
     @State private var expandedMenu: TabItem? = nil
     
@@ -79,8 +80,6 @@ struct TabBarView: View {
                                 ManagersListView()
                             } else if selectedSubTab == "Vendeurs" {
                                 SellersListView()
-                            } else {
-                                PlaceholderView(title: "Utilisateurs", icon: "person.3.fill")
                             }
                         case 3:
                             if selectedSubTab == "Jeux" {
@@ -89,8 +88,6 @@ struct TabBarView: View {
                                 GameEditorsListView()
                             } else if selectedSubTab == "Catégories" {
                                 GameCategoriesListView()
-                            } else {
-                                PlaceholderView(title: "Jeux", icon: "gamecontroller.fill")
                             }
                         case 4:
                             if selectedSubTab == "Dépôts" {
@@ -101,8 +98,6 @@ struct TabBarView: View {
                                 WithdrawalsListView()
                             } else if selectedSubTab == "Bilan" {
                                 BalanceView()
-                            } else {
-                                PlaceholderView(title: "Transactions", icon: "creditcard.fill")
                             }
                         case 5:
                             SessionsListView()
@@ -141,6 +136,10 @@ struct TabBarView: View {
                         ForEach(menu.items, id: \.title) { item in
                             ExpandableTabButton(icon: item.icon, text: item.title) {
                                 selectedSubTab = item.title
+                                // When a submenu item is selected, also update the selected tab
+                                if let index = filteredTabItems.firstIndex(where: { $0.name == expandedMenu?.name }) {
+                                    selectedTab = filteredTabItems[index].id
+                                }
                                 withAnimation(.spring()) {
                                     expandedMenu = nil
                                 }
@@ -171,9 +170,12 @@ struct TabBarView: View {
                 Button {
                     if isExpendable {
                         toggleMenu(name: item.name)
+                        // Only update the highlighted tab, not the selected tab
+                        highlightedTab = item.id
                     } else {
                         withAnimation {
                             selectedTab = item.id
+                            highlightedTab = item.id
                             selectedSubTab = nil
                             expandedMenu = nil
                         }
@@ -193,12 +195,12 @@ struct TabBarView: View {
                                     .frame(width: 20, height: 20)
                             }
                         }
-                        
+
                         Text(item.name)
                             .font(.system(size: 10))
                             .padding(.bottom, 30)
                     }
-                    .foregroundColor(selectedTab == item.id ? .blue : .gray)
+                    .foregroundColor(highlightedTab == item.id ? .blue : .gray)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 }
@@ -213,10 +215,6 @@ struct TabBarView: View {
         )
     }
     
-    private func isExpandableTab(_ name: String) -> Bool {
-        return expandableMenus.keys.contains(name)
-    }
-    
     private func toggleMenu(name: String) {
         withAnimation(.spring()) {
             if expandedMenu?.name == name {
@@ -224,9 +222,8 @@ struct TabBarView: View {
             } else {
                 if let items = expandableMenus[name] {
                     expandedMenu = TabItem(name: name, items: items)
-                    if let index = filteredTabItems.firstIndex(where: { $0.name == name }) {
-                        selectedTab = filteredTabItems[index].id
-                    }
+                    // Don't change the selected tab, only the menu properties
+                    // The view won't change when expanding a menu
                 }
             }
         }
@@ -235,6 +232,11 @@ struct TabBarView: View {
     // Updated access control logic
     private func canAccessTab(_ roles: [String]) -> Bool {
         return roles.contains(userRole)
+    }
+    
+    // Check if a tab is expandable (has submenu items)
+    private func isExpandableTab(_ name: String) -> Bool {
+        return expandableMenus.keys.contains(name)
     }
 }
 
@@ -264,30 +266,6 @@ struct ExpandableTabButton: View {
             .background(Color.blue)
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
-        }
-    }
-}
-
-// Placeholder View
-struct PlaceholderView: View {
-    var title: String
-    var icon: String
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: icon)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
-                .foregroundColor(.gray)
-            
-            Text(title)
-                .font(.title)
-                .fontWeight(.medium)
-            
-            Text("Sélectionnez une option du menu")
-                .font(.subheadline)
-                .foregroundColor(.gray)
         }
     }
 }
