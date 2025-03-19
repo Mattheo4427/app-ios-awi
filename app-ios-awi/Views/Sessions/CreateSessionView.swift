@@ -23,11 +23,11 @@ struct CreateSessionView: View {
             TextField("Nom de la session", text: $name)
             DatePicker("Date de début", selection: $dateBegin, displayedComponents: .date)
             DatePicker("Date de fin", selection: $dateEnd, displayedComponents: .date)
-            TextField("Frais de dépôt", text: $depositFees)
+            TextField("Frais de dépôt ($)", text: $depositFees)
                 .keyboardType(.decimalPad)
-            TextField("Remise", text: $discount)
+            TextField("Remise (%)", text: $discount)
                 .keyboardType(.decimalPad)
-            TextField("Frais de commission", text: $commissionFees)
+            TextField("Frais de commission ($)", text: $commissionFees)
                 .keyboardType(.decimalPad)
             
             Button("Créer Session") {

@@ -44,74 +44,76 @@ struct TabBarView: View {
     
     var body: some View {
         ZStack {
-            // Content based on selected tab
-            VStack {
-                Spacer()
-                switch selectedTab {
-                case 0:
-                    HomeView()
-                case 1:
-                    if selectedSubTab == "Clients" {
-                        ClientsListView()
-                    } else if selectedSubTab == "Managers" {
-                        ManagersListView()
-                    } else if selectedSubTab == "Vendeurs" {
-                        SellersListView()
-                    } else {
-                        PlaceholderView(title: "Utilisateurs", icon: "person.3.fill")
+            // Content area (your main views)
+            VStack(spacing: 0) {
+                // Main content
+                ZStack {
+                    switch selectedTab {
+                    case 0:
+                        HomeView()
+                    case 1:
+                        if selectedSubTab == "Clients" {
+                            ClientsListView()
+                        } else if selectedSubTab == "Managers" {
+                            ManagersListView()
+                        } else if selectedSubTab == "Vendeurs" {
+                            SellersListView()
+                        } else {
+                            PlaceholderView(title: "Utilisateurs", icon: "person.3.fill")
+                        }
+                    case 2:
+                        if selectedSubTab == "Jeux" {
+                            GamesListView()
+                        } else if selectedSubTab == "Editeurs" {
+                            GameEditorsListView()
+                        } else if selectedSubTab == "Catégories" {
+                            GameCategoriesListView()
+                        } else {
+                            PlaceholderView(title: "Jeux", icon: "gamecontroller.fill")
+                        }
+                    case 3:
+                        if selectedSubTab == "Dépôts" {
+                            DepositsListView()
+                        } else if selectedSubTab == "Ventes" {
+                            SalesListView()
+                        } else if selectedSubTab == "Retraits" {
+                            WithdrawalsListView()
+                        } else if selectedSubTab == "Bilan" {
+                            BalanceView()
+                        }
+                        else {
+                            PlaceholderView(title: "Transactions", icon: "creditcard.fill")
+                        }
+                    case 4:
+                        SessionsListView()
+                    case 5:
+                        LoginView()
+                    default:
+                        HomeView()
                     }
-                case 2:
-                    if selectedSubTab == "Jeux" {
-                        GamesListView()
-                    } else if selectedSubTab == "Editeurs" {
-                        GameEditorsListView()
-                    } else if selectedSubTab == "Catégories" {
-                        GameCategoriesListView()
-                    } else {
-                        PlaceholderView(title: "Jeux", icon: "gamecontroller.fill")
-                    }
-                /*
-                TODO : ADD ALL THOSE VIEWS
-                case 3:
-                    if selectedSubTab == "Dépôts" {
-                        DepositsListView()
-                    } else if selectedSubTab == "Ventes" {
-                        SalesListView()
-                    } else if selectedSubTab == "Retraits" {
-                        WithdrawalsListView()
-                    } else if selectedSubTab == "Bilan" {
-                        BalanceView()
-                    } else {
-                        PlaceholderView(title: "Transactions", icon: "creditcard.fill")
-                    }
-                 */
-                case 4:
-                    SessionsListView()
-                case 5:
-                    LoginView()
-                default:
-                    HomeView()
                 }
-                Spacer()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                // Custom Tab Bar
+                // Custom Tab Bar - Now positioned directly at the bottom with no extra space
                 customTabBar
             }
+            .zIndex(0) // Force main content to be on base layer
             
-            // Expandable Menu Overlay
+            // Expandable Menu Overlay - place this AFTER content to ensure it's on top
             if let menu = expandedMenu {
+                // Dimmed background overlay
+                Color.black.opacity(0.3)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        withAnimation(.spring()) {
+                            expandedMenu = nil
+                        }
+                    }
+                    .zIndex(1) // Layer 1: Background overlay
+                
+                // Menu items in separate layer with higher z-index
                 VStack {
                     Spacer()
-                    
-                    // Dimmed background overlay when menu is expanded
-                    Color.black.opacity(0.3)
-                        .edgesIgnoringSafeArea(.all)
-                        .onTapGesture {
-                            withAnimation(.spring()) {
-                                expandedMenu = nil
-                            }
-                        }
-                    
                     // Menu items
                     VStack(spacing: 12) {
                         ForEach(menu.items, id: \.title) { item in
@@ -124,12 +126,14 @@ struct TabBarView: View {
                             }
                         }
                     }
-                    .padding(.bottom, 90)
+                    // Adjusted bottom padding to position menu closer to tab bar
+                    .padding(.bottom, 100)
                     .transition(.move(edge: .bottom))
                 }
-                .zIndex(1)
+                .zIndex(2) // Layer 2: Menu buttons (highest)
             }
         }
+        .edgesIgnoringSafeArea(.bottom)
     }
     
     // Custom Tab Bar View
@@ -145,8 +149,7 @@ struct TabBarView: View {
                     } else {
                         withAnimation {
                             selectedTab = index
-                            selectedSubTab = nil  // Reset selected sub tab when changing tabs
-                            // Close any open menu when switching tabs
+                            selectedSubTab = nil
                             expandedMenu = nil
                         }
                     }
@@ -169,6 +172,7 @@ struct TabBarView: View {
                         
                         Text(item.0)
                             .font(.system(size: 10))
+                            .padding(.bottom, 30)
                     }
                     .foregroundColor(selectedTab == index ? .blue : .gray)
                     .frame(maxWidth: .infinity)
@@ -183,7 +187,6 @@ struct TabBarView: View {
                 .foregroundColor(Color(UIColor.systemGray4)),
             alignment: .top
         )
-        .edgesIgnoringSafeArea(.bottom)
     }
     
     // Check if a tab is expandable
