@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import JWTDecode
 
 class LoginViewModel: ObservableObject {
     @Published var email = ""
@@ -15,7 +16,11 @@ class LoginViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var isLoading = false
     @Published var loginSuccess = false
-    
+
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+    @AppStorage("userRole") var userRole = "client"  // Default to "client" (not connected)
+    @AppStorage("authToken") var authToken = ""
+
     private let urlPath = "auth/login/"
 
     func validateCredentials() -> Bool {
@@ -53,8 +58,13 @@ class LoginViewModel: ObservableObject {
                 self.isLoading = false
                 
                 if let response = decodeJSON(from: data, as: LoginResponse.self) {
-                    self.loginSuccess = true
-                    print("Login successful: \(response.token)")
+                    self.isLoggedIn = true
+                    self.authToken = response.accesstoken  // Store the JWT token
+                    
+                    // Extract role from JWT token
+                    self.userRole = self.extractRole(from: response.accesstoken)
+                    
+                    print("Login successful: \(response.accesstoken), Role: \(self.userRole)")
                 } else if let errorResponse = decodeJSON(from: data, as: ErrorResponse.self) {
                     self.showErrorMessage = true
                     self.errorMessage = errorResponse.message
@@ -71,11 +81,31 @@ class LoginViewModel: ObservableObject {
             }
         }
     }
+
+    func logout() {
+        isLoggedIn = false
+        userRole = "client"
+        authToken = ""
+        email = ""
+        password = ""
+    }
+
+    private func extractRole(from token: String) -> String {
+        do {
+            let jwt = try decode(jwt: token)
+            if let role = jwt.claim(name: "role").string {
+                return role
+            }
+        } catch {
+            print("JWT decoding error: \(error.localizedDescription)")
+        }
+        return "client"
+    }
 }
 
 // Structs to handle responses
 struct LoginResponse: Decodable {
-    let token: String
+    let accesstoken: String
 }
 
 struct ErrorResponse: Decodable {

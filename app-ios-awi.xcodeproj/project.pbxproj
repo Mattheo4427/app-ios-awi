@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1D41349C2D888C9F008A0A05 /* GameCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D41349B2D888C9F008A0A05 /* GameCategory.swift */; };
+		B70389062D8AE66D009209F6 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = B70389052D8AE66D009209F6 /* JWTDecode */; };
 		B7172B212D897CE400727D2C /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B202D897CE400727D2C /* Session.swift */; };
 		B7172B242D897DED00727D2C /* SessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B232D897DED00727D2C /* SessionViewModel.swift */; };
 		B7172B262D897E0D00727D2C /* SessionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7172B252D897E0D00727D2C /* SessionsListView.swift */; };
@@ -144,6 +145,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B70389062D8AE66D009209F6 /* JWTDecode in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -421,6 +423,7 @@
 			);
 			name = "app-ios-awi";
 			packageProductDependencies = (
+				B70389052D8AE66D009209F6 /* JWTDecode */,
 			);
 			productName = "app-ios-awi";
 			productReference = B719CBD92D81A85F002E4579 /* app-ios-awi.app */;
@@ -451,6 +454,7 @@
 			);
 			mainGroup = B719CBD02D81A85F002E4579;
 			packageReferences = (
+				B70389042D8AE66D009209F6 /* XCRemoteSwiftPackageReference "JWTDecode" */,
 			);
 			productRefGroup = B719CBDA2D81A85F002E4579 /* Products */;
 			projectDirPath = "";
@@ -737,6 +741,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B70389042D8AE66D009209F6 /* XCRemoteSwiftPackageReference "JWTDecode" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/auth0/JWTDecode.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B70389052D8AE66D009209F6 /* JWTDecode */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B70389042D8AE66D009209F6 /* XCRemoteSwiftPackageReference "JWTDecode" */;
+			productName = JWTDecode;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B719CBD12D81A85F002E4579 /* Project object */;
 }
