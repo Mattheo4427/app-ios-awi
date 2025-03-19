@@ -33,7 +33,7 @@ struct WithdrawalsListView: View {
                         ForEach(viewModel.withdrawals) { withdrawal in
                             NavigationLink(destination: UpdateWithdrawalView(viewModel: viewModel, withdrawal: withdrawal)) {
                                 VStack(alignment: .leading) {
-                                    Text("Withdrawal ID: \(withdrawal.id_withdrawal)")
+                                    Text("ID Retrait: \(withdrawal.id_withdrawal)")
                                         .font(.headline)
                                     Text("Montant: \(withdrawal.amount, specifier: "%.2f")")
                                         .font(.subheadline)
@@ -44,7 +44,7 @@ struct WithdrawalsListView: View {
                     }
                 }
             }
-            .navigationTitle("Withdrawals")
+            .navigationTitle("Retraits")
             .toolbar {
                 NavigationLink(destination: CreateWithdrawalView(viewModel: viewModel)) {
                     Image(systemName: "plus")
