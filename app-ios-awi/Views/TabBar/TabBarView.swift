@@ -13,7 +13,7 @@ struct TabBarView: View {
     @State private var selectedSubTab: String? = nil
     @State private var expandedMenu: TabItem? = nil
     
-    @AppStorage("userRole") private var userRole = "admin"
+    @AppStorage("userRole") private var userRole = "client"
     
     // Define all possible tab items with unique identifiers
     private let allTabItems: [(id: Int, role: [String], name: String, icon: String)] = [
