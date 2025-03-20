@@ -37,12 +37,51 @@ struct SellersListView: View {
                     List {
                         ForEach(viewModel.sellers) { seller in
                             NavigationLink(destination: UpdateSellerView(viewModel: viewModel, seller: seller)) {
-                                VStack(alignment: .leading) {
-                                    Text("\(seller.firstname) \(seller.lastname)")
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(seller.username)
                                         .font(.headline)
-                                    Text(seller.email)
-                                        .foregroundColor(.gray)
+                                    
+                                    Text("\(seller.firstname) \(seller.lastname)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    
+                                    Label {
+                                        Text(seller.email)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    } icon: {
+                                        Image(systemName: "envelope")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+                                    
+                                    if let phone = seller.phone, !phone.isEmpty {
+                                        Label {
+                                            Text(phone)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        } icon: {
+                                            Image(systemName: "phone")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    
+                                    if let address = seller.address, !address.isEmpty {
+                                        Label {
+                                            Text(address)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.tail)
+                                        } icon: {
+                                            Image(systemName: "mappin.and.ellipse")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
                                 }
+                                .padding(.vertical, 6)
                             }
                         }
                         .onDelete(perform: deleteSeller)

@@ -37,12 +37,69 @@ struct ManagersListView: View {
                     List {
                         ForEach(viewModel.managers) { manager in
                             NavigationLink(destination: UpdateManagerView(viewModel: viewModel, manager: manager)) {
-                                VStack(alignment: .leading) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text(manager.username)
+                                            .font(.headline)
+                                        
+                                        Spacer()
+                                        
+                                        // Admin badge
+                                        if manager.is_admin {
+                                            Text("Admin")
+                                                .font(.caption)
+                                                .fontWeight(.medium)
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 4)
+                                                .background(Color.blue.opacity(0.2))
+                                                .foregroundColor(.blue)
+                                                .cornerRadius(4)
+                                        }
+                                    }
+                                    
                                     Text("\(manager.firstname) \(manager.lastname)")
-                                        .font(.headline)
-                                    Text(manager.email)
-                                        .foregroundColor(.gray)
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    
+                                    HStack(spacing: 12) {
+                                        Label {
+                                            Text(manager.email)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        } icon: {
+                                            Image(systemName: "envelope")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                        
+                                        if let phone = manager.phone, !phone.isEmpty {
+                                            Label {
+                                                Text(phone)
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            } icon: {
+                                                Image(systemName: "phone")
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                    }
+                                    
+                                    if let address = manager.address, !address.isEmpty {
+                                        Label {
+                                            Text(address)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.tail)
+                                        } icon: {
+                                            Image(systemName: "mappin.and.ellipse")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
                                 }
+                                .padding(.vertical, 6)
                             }
                         }
                         .onDelete(perform: deleteManager)
