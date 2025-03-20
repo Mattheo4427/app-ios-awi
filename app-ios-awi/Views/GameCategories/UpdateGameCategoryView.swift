@@ -28,11 +28,21 @@ struct UpdateGameCategoryView: View {
                         description: descriptionText.isEmpty ? nil : descriptionText
                     )
                     await viewModel.updateGameCategory(category: updatedCategory)
-                    presentationMode.wrappedValue.dismiss()
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Modification Catégorie")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
         .onAppear {
             name = category.name
             descriptionText = category.description ?? ""

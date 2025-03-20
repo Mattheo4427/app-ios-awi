@@ -12,9 +12,9 @@ struct Session: Identifiable, Codable {
     var name: String
     var date_begin: Date
     var date_end: Date
-    var deposit_fees: Double
-    var discount: Double
-    var commission_fees: Double
+    var deposit_fees: String
+    var discount: String
+    var comission_fees: String
 
     var id: Int { id_session }
 }

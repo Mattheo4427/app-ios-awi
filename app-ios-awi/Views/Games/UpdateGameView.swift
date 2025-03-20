@@ -55,11 +55,21 @@ struct UpdateGameView: View {
                         id_category: Int(idCategory) ?? 0
                     )
                     await viewModel.updateGame(game: updatedGame)
-                    presentationMode.wrappedValue.dismiss()
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Modification Jeu")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
         .onAppear {
             name = game.name
             descriptionText = game.description ?? ""

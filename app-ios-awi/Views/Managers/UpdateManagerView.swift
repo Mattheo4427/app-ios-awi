@@ -23,17 +23,27 @@ struct UpdateManagerView: View {
                     get: { manager.address ?? "" },
                     set: { manager.address = $0.isEmpty ? nil : $0 }
                 ))
-                SecureField("Mot de passe", text: $manager.password)
             }
             
             Button("Modifier Manager") {
                 Task {
                     await viewModel.updateManager(manager: manager)
-                    presentationMode.wrappedValue.dismiss()
+                    // Only dismiss if there was no error
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
             .padding()
         }
         .navigationTitle("Modification Manager")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

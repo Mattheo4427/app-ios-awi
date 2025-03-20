@@ -41,10 +41,21 @@ struct CreateSellerView: View {
                         address: address.isEmpty ? nil : address
                     )
                     await viewModel.createSeller(seller: newSeller)
-                    presentationMode.wrappedValue.dismiss()
+                    // Only dismiss if there was no error
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Nouveau Vendeur")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

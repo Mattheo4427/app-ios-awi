@@ -27,10 +27,20 @@ struct CreateGameEditorView: View {
                         description: descriptionText.isEmpty ? nil : descriptionText
                     )
                     await viewModel.createGameEditor(editor: newEditor)
-                    presentationMode.wrappedValue.dismiss()
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Nouvel Editeur")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

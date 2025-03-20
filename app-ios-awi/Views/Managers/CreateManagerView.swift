@@ -18,7 +18,7 @@ struct CreateManagerView: View {
     @State private var address = ""
     @State private var password = ""
     @State private var isAdmin = false // Toggle for admin role
-
+    
     var body: some View {
         Form {
             TextField("Nom d'utilisateur", text: $username)
@@ -29,7 +29,7 @@ struct CreateManagerView: View {
             TextField("Addresse", text: $address)
             SecureField("Mot de passe", text: $password)
             Toggle("Admin", isOn: $isAdmin)
-
+            
             Button("Créer Manager") {
                 Task {
                     let newManager = Manager(
@@ -44,10 +44,21 @@ struct CreateManagerView: View {
                         is_admin: isAdmin
                     )
                     await viewModel.createManager(manager: newManager)
-                    presentationMode.wrappedValue.dismiss()
+                    // Only dismiss if there was no error
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
+            .navigationTitle("Nouveau Manager")
+            .alert("Erreur", isPresented: Binding<Bool>(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.dismissError() } }
+            ), actions: {
+                Button("OK", role: .cancel) { }
+            }, message: {
+                Text(viewModel.errorMessage ?? "")
+            })
         }
-        .navigationTitle("Nouveau Manager")
     }
 }

@@ -54,10 +54,20 @@ struct CreateGameView: View {
                         id_category: Int(idCategory) ?? 0
                     )
                     await viewModel.createGame(game: newGame)
-                    presentationMode.wrappedValue.dismiss()
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Nouveau Jeu")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

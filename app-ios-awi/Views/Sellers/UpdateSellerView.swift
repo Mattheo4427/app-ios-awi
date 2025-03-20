@@ -25,15 +25,25 @@ struct UpdateSellerView: View {
                 get: { seller.address ?? "" },
                 set: { seller.address = $0.isEmpty ? nil : $0 }
             ))
-            SecureField("Mot de passe", text: $seller.password)
 
             Button("Modifier Vendeur") {
                 Task {
                     await viewModel.updateSeller(seller: seller)
-                    presentationMode.wrappedValue.dismiss()
+                    // Only dismiss if there was no error
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Modification Vendeur")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }
