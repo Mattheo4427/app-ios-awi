@@ -16,7 +16,7 @@ struct CreateSessionView: View {
     @State private var dateEnd = Date()
     @State private var depositFees = ""
     @State private var discount = ""
-    @State private var commissionFees = ""
+    @State private var comissionFees = ""
 
     var body: some View {
         Form {
@@ -27,7 +27,7 @@ struct CreateSessionView: View {
                 .keyboardType(.decimalPad)
             TextField("Remise (%)", text: $discount)
                 .keyboardType(.decimalPad)
-            TextField("Frais de commission ($)", text: $commissionFees)
+            TextField("Frais de commission ($)", text: $comissionFees)
                 .keyboardType(.decimalPad)
             
             Button("Créer Session") {
@@ -37,9 +37,9 @@ struct CreateSessionView: View {
                         name: name,
                         date_begin: dateBegin,
                         date_end: dateEnd,
-                        deposit_fees: Double(depositFees) ?? 0.0,
-                        discount: Double(discount) ?? 0.0,
-                        commission_fees: Double(commissionFees) ?? 0.0
+                        deposit_fees: (depositFees),
+                        discount: (discount),
+                        comission_fees: (comissionFees)
                     )
                     await viewModel.createSession(session: newSession)
                     presentationMode.wrappedValue.dismiss()

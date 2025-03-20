@@ -52,7 +52,7 @@ class ManagerViewModel: ObservableObject {
     func updateManager(manager: Manager) async {
         do {
             let body = try JSONEncoder().encode(manager)
-            let data = try await fetchData(from: "\(endpoint)/\(manager.id_manager)", reqMethod: "PUT", body: body, token: authToken)
+            let data = try await fetchData(from: "\(endpoint)update/\(manager.id_manager)", reqMethod: "PUT", body: body, token: authToken)
             
             if let updatedManager: Manager = decodeJSON(from: data, as: Manager.self) {
                 if let index = self.managers.firstIndex(where: { $0.id_manager == updatedManager.id_manager }) {
@@ -70,7 +70,7 @@ class ManagerViewModel: ObservableObject {
     // Delete a manager
     func deleteManager(managerID: String) async {
         do {
-            _ = try await fetchData(from: "\(endpoint)/\(managerID)", reqMethod: "DELETE", token: authToken)
+            _ = try await fetchData(from: "\(endpoint)delete/\(managerID)", reqMethod: "DELETE", token: authToken)
             self.managers.removeAll { $0.id_manager == managerID }
             self.errorMessage = nil
         } catch let networkError as NetworkError {

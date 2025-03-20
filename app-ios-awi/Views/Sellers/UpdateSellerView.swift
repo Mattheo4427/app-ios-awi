@@ -25,7 +25,6 @@ struct UpdateSellerView: View {
                 get: { seller.address ?? "" },
                 set: { seller.address = $0.isEmpty ? nil : $0 }
             ))
-            SecureField("Mot de passe", text: $seller.password)
 
             Button("Modifier Vendeur") {
                 Task {

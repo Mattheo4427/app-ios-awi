@@ -82,6 +82,17 @@ func decodeJSON<T: Decodable>(from data: Data?, as type: T.Type) -> T? {
     }
     
     let decoder = JSONDecoder()
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    decoder.dateDecodingStrategy = .custom { decoder -> Date in
+        let container = try decoder.singleValueContainer()
+        let dateString = try container.decode(String.self)
+        if let date = formatter.date(from: dateString) {
+            return date
+        }
+        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+    }
+    
     do {
         let result = try decoder.decode(T.self, from: data)
         print("🟢 Successfully decoded \(String(describing: T.self))")

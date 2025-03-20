@@ -23,7 +23,6 @@ struct UpdateManagerView: View {
                     get: { manager.address ?? "" },
                     set: { manager.address = $0.isEmpty ? nil : $0 }
                 ))
-                SecureField("Mot de passe", text: $manager.password)
             }
             
             Button("Modifier Manager") {
