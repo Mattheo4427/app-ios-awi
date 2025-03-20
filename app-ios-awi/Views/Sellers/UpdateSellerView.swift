@@ -13,25 +13,75 @@ struct UpdateSellerView: View {
 
     var body: some View {
         Form {
-            TextField("Nom d'utilisateur", text: $seller.username)
-            TextField("Prénom", text: $seller.firstname)
-            TextField("Nom", text: $seller.lastname)
-            TextField("Email", text: $seller.email)
-            TextField("Téléphone", text: Binding(
-                get: { seller.phone ?? "" },
-                set: { seller.phone = $0.isEmpty ? nil : $0 }
-            ))
-            TextField("Addresse", text: Binding(
-                get: { seller.address ?? "" },
-                set: { seller.address = $0.isEmpty ? nil : $0 }
-            ))
-
-            Button("Modifier Vendeur") {
-                Task {
-                    await viewModel.updateSeller(seller: seller)
-                    // Only dismiss if there was no error
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+            Section(header: Text("Compte")) {
+                VStack(alignment: .leading) {
+                    Text("Nom d'utilisateur")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom d'utilisateur", text: $seller.username)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Informations personnelles")) {
+                VStack(alignment: .leading) {
+                    Text("Prénom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Prénom", text: $seller.firstname)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Nom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $seller.lastname)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Coordonnées")) {
+                VStack(alignment: .leading) {
+                    Text("Email")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Email", text: $seller.email)
+                        .keyboardType(.emailAddress)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Téléphone")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Téléphone", text: Binding(
+                        get: { seller.phone ?? "" },
+                        set: { seller.phone = $0.isEmpty ? nil : $0 }
+                    ))
+                    .keyboardType(.phonePad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Adresse")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Adresse", text: Binding(
+                        get: { seller.address ?? "" },
+                        set: { seller.address = $0.isEmpty ? nil : $0 }
+                    ))
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Modifier Vendeur") {
+                    Task {
+                        await viewModel.updateSeller(seller: seller)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

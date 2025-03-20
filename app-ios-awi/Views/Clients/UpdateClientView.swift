@@ -14,21 +14,62 @@ struct UpdateClientView: View {
 
     var body: some View {
         Form {
-            TextField("Prénom", text: $client.firstname)
-            TextField("Nom", text: $client.lastname)
-            TextField("Email", text: $client.email)
-            TextField("Téléphone", text: $client.phone)
-            TextField("Addresse", text: Binding(
-                get: { client.address ?? "" },
-                set: { client.address = $0.isEmpty ? nil : $0 }
-            ))
-
-            Button("Modifier Client") {
-                Task {
-                    await viewModel.updateClient(client: client)
-                    // Only dismiss if there was no error
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+            Section(header: Text("Informations personnelles")) {
+                VStack(alignment: .leading) {
+                    Text("Prénom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Prénom", text: $client.firstname)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Nom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $client.lastname)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Coordonnées")) {
+                VStack(alignment: .leading) {
+                    Text("Email")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Email", text: $client.email)
+                        .keyboardType(.emailAddress)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Téléphone")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Téléphone", text: $client.phone)
+                        .keyboardType(.phonePad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Adresse")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Adresse", text: Binding(
+                        get: { client.address ?? "" },
+                        set: { client.address = $0.isEmpty ? nil : $0 }
+                    ))
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Modifier Client") {
+                    Task {
+                        await viewModel.updateClient(client: client)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

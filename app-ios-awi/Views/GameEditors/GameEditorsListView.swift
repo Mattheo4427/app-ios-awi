@@ -32,8 +32,15 @@ struct GameEditorsListView: View {
                     List {
                         ForEach(viewModel.gameEditors) { editor in
                             NavigationLink(destination: UpdateGameEditorView(viewModel: viewModel, editor: editor)) {
-                                Text(editor.name)
-                                    .font(.headline)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(editor.name)
+                                        .font(.headline)
+                                    Text(editor.description ?? "Aucune description")
+                                        .lineLimit(2)
+                                        .truncationMode(.tail)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                         .onDelete(perform: deleteEditor)

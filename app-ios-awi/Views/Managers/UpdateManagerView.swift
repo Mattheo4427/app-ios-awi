@@ -13,28 +13,82 @@ struct UpdateManagerView: View {
 
     var body: some View {
         Form {
-            Section {
-                TextField("Nom d'utilisateur", text: $manager.username)
-                TextField("Prénom", text: $manager.firstname)
-                TextField("Nom", text: $manager.lastname)
-                TextField("Email", text: $manager.email)
-                TextField("Téléphone", text: $manager.phone)
-                TextField("Addresse", text: Binding(
-                    get: { manager.address ?? "" },
-                    set: { manager.address = $0.isEmpty ? nil : $0 }
+            Section(header: Text("Compte")) {
+                VStack(alignment: .leading) {
+                    Text("Nom d'utilisateur")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom d'utilisateur", text: $manager.username)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Informations personnelles")) {
+                VStack(alignment: .leading) {
+                    Text("Prénom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Prénom", text: $manager.firstname)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Nom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $manager.lastname)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Coordonnées")) {
+                VStack(alignment: .leading) {
+                    Text("Email")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Email", text: $manager.email)
+                        .keyboardType(.emailAddress)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Téléphone")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Téléphone", text: $manager.phone)
+                        .keyboardType(.phonePad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Adresse")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Adresse", text: Binding(
+                        get: { manager.address ?? "" },
+                        set: { manager.address = $0.isEmpty ? nil : $0 }
+                    ))
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Permissions")) {
+                Toggle("Droits administrateur", isOn: Binding(
+                    get: { manager.is_admin },
+                    set: { manager.is_admin = $0 }
                 ))
             }
             
-            Button("Modifier Manager") {
-                Task {
-                    await viewModel.updateManager(manager: manager)
-                    // Only dismiss if there was no error
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+            Section {
+                Button("Modifier Manager") {
+                    Task {
+                        await viewModel.updateManager(manager: manager)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }
-            .padding()
         }
         .navigationTitle("Modification Manager")
         .alert("Erreur", isPresented: Binding<Bool>(

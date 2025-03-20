@@ -19,26 +19,67 @@ struct CreateClientView: View {
 
     var body: some View {
         Form {
-            TextField("Prénom", text: $firstname)
-            TextField("Nom", text: $lastname)
-            TextField("Email", text: $email)
-            TextField("Téléphone", text: $phone)
-            TextField("Addresse", text: $address)
-
-            Button("Créer Client") {
-                Task {
-                    let newClient = Client(
-                        id_client: Int.random(in: 1000...9999), // Temporary ID
-                        firstname: firstname,
-                        lastname: lastname,
-                        email: email,
-                        phone: phone,
-                        address: address.isEmpty ? nil : address
-                    )
-                    await viewModel.createClient(client: newClient)
-                    // Only dismiss if there was no error
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+            Section(header: Text("Informations personnelles")) {
+                VStack(alignment: .leading) {
+                    Text("Prénom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Prénom", text: $firstname)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Nom")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $lastname)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Coordonnées")) {
+                VStack(alignment: .leading) {
+                    Text("Email")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Email", text: $email)
+                        .keyboardType(.emailAddress)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Téléphone")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Téléphone", text: $phone)
+                        .keyboardType(.phonePad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Adresse")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Adresse", text: $address)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Créer Client") {
+                    Task {
+                        let newClient = Client(
+                            id_client: Int.random(in: 1000...9999),
+                            firstname: firstname,
+                            lastname: lastname,
+                            email: email,
+                            phone: phone,
+                            address: address.isEmpty ? nil : address
+                        )
+                        await viewModel.createClient(client: newClient)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

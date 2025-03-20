@@ -59,8 +59,22 @@ struct GamesListView: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(game.name)
                                             .font(.headline)
-                                        Text("Joueurs: \(game.min_players)-\(game.max_players)")
-                                            .foregroundColor(.gray)
+                                        HStack(spacing: 12) {
+                                            Text("👥 \(game.min_players)-\(game.max_players)")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Text("📅 \(game.min_age)-\(game.max_age) ans")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                        if let description = game.description {
+                                            Text(description)
+                                                .lineLimit(2)  // Increased from 1 to 2 lines
+                                                .truncationMode(.tail)
+                                                .font(.subheadline)  // Upgraded from caption to subheadline
+                                                .foregroundColor(.secondary)
+                                                .padding(.top, 2)  // Added small padding
+                                        }
                                     }
                                     .padding(.leading, 8)
                                 }

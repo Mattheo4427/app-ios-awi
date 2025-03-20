@@ -24,39 +24,111 @@ struct UpdateGameView: View {
 
     var body: some View {
         Form {
-            TextField("Nom", text: $name)
-            TextField("Description", text: $descriptionText)
-            TextField("Image URL", text: $image)
-            TextField("Min Players", text: $minPlayers)
-                .keyboardType(.numberPad)
-            TextField("Max Players", text: $maxPlayers)
-                .keyboardType(.numberPad)
-            TextField("Min Age", text: $minAge)
-                .keyboardType(.numberPad)
-            TextField("Max Age", text: $maxAge)
-                .keyboardType(.numberPad)
-            TextField("ID Editeur", text: $idEditor)
-                .keyboardType(.numberPad)
-            TextField("ID Catégorie", text: $idCategory)
-                .keyboardType(.numberPad)
+            VStack(alignment: .leading) {
+                Text("Nom du jeu")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                TextField("Nom", text: $name)
+            }
             
-            Button("Modifier Jeu") {
-                Task {
-                    let updatedGame = Game(
-                        id_game: game.id_game,
-                        name: name,
-                        description: descriptionText.isEmpty ? nil : descriptionText,
-                        image: image.isEmpty ? nil : image,
-                        min_players: Int(minPlayers) ?? 0,
-                        max_players: Int(maxPlayers) ?? 0,
-                        min_age: Int(minAge) ?? 0,
-                        max_age: Int(maxAge) ?? 0,
-                        id_editor: Int(idEditor) ?? 0,
-                        id_category: Int(idCategory) ?? 0
+            Section(header: Text("Description")) {
+                TextEditor(text: $descriptionText)
+                    .frame(minHeight: 150)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                     )
-                    await viewModel.updateGame(game: updatedGame)
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+                    .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Média")) {
+                TextField("Image URL", text: $image)
+            }
+            
+            Section(header: Text("Nombre de joueurs")) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Minimum")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        TextField("Min", text: $minPlayers)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .leading) {
+                        Text("Maximum")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        TextField("Max", text: $maxPlayers)
+                            .keyboardType(.numberPad)
+                    }
+                }
+            }
+
+            Section(header: Text("Âge recommandé")) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Minimum")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        TextField("Min", text: $minAge)
+                            .keyboardType(.numberPad)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .leading) {
+                        Text("Maximum")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        TextField("Max", text: $maxAge)
+                            .keyboardType(.numberPad)
+                    }
+                }
+            }
+
+            
+            Section(header: Text("Références")) {
+                VStack(alignment: .leading) {
+                    Text("Éditeur")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("ID Éditeur", text: $idEditor)
+                        .keyboardType(.numberPad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Catégorie")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("ID Catégorie", text: $idCategory)
+                        .keyboardType(.numberPad)
+                }
+                .padding(.vertical, 4)
+            }       
+            
+            Section {
+                Button("Modifier Jeu") {
+                    Task {
+                        let updatedGame = Game(
+                            id_game: game.id_game,
+                            name: name,
+                            description: descriptionText.isEmpty ? nil : descriptionText,
+                            image: image.isEmpty ? nil : image,
+                            min_players: Int(minPlayers) ?? 0,
+                            max_players: Int(maxPlayers) ?? 0,
+                            min_age: Int(minAge) ?? 0,
+                            max_age: Int(maxAge) ?? 0,
+                            id_editor: Int(idEditor) ?? 0,
+                            id_category: Int(idCategory) ?? 0
+                        )
+                        await viewModel.updateGame(game: updatedGame)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

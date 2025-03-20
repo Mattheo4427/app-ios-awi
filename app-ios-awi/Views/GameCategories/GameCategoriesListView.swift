@@ -12,7 +12,7 @@ struct GameCategoriesListView: View {
     
     var body: some View {
         NavigationView {
-            Group {
+            ZStack {
                 if viewModel.gameCategories.isEmpty {
                     VStack {
                         Image(systemName: "list.bullet")
@@ -30,10 +30,17 @@ struct GameCategoriesListView: View {
                     }
                 } else {
                     List {
-                        ForEach(viewModel.gameCategories) { category in
+                        ForEach(viewModel.gameCategories, id: \.id_category) { category in
                             NavigationLink(destination: UpdateGameCategoryView(viewModel: viewModel, category: category)) {
-                                Text(category.name)
-                                    .font(.headline)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(category.name)
+                                        .font(.headline)
+                                    Text(category.description ?? "Aucune description")
+                                        .lineLimit(2)
+                                        .truncationMode(.tail)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                         .onDelete(perform: deleteCategory)
@@ -42,8 +49,10 @@ struct GameCategoriesListView: View {
             }
             .navigationTitle("Catégories")
             .toolbar {
-                NavigationLink(destination: CreateGameCategoryView(viewModel: viewModel)) {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: CreateGameCategoryView(viewModel: viewModel)) {
+                        Image(systemName: "plus")
+                    }
                 }
             }
             .task {
