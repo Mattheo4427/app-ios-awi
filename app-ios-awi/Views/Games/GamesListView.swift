@@ -32,12 +32,39 @@ struct GamesListView: View {
                     List {
                         ForEach(viewModel.games) { game in
                             NavigationLink(destination: UpdateGameView(viewModel: viewModel, game: game)) {
-                                VStack(alignment: .leading) {
-                                    Text(game.name)
-                                        .font(.headline)
-                                    Text("Joueurs: \(game.min_players)-\(game.max_players)")
-                                        .foregroundColor(.gray)
+                                HStack {
+                                    AsyncImage(url: URL(string: game.image ?? "")) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                                .frame(width: 60, height: 60)
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 60, height: 60)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        case .failure:
+                                            Image(systemName: "photo")
+                                                .foregroundColor(.gray)
+                                                .frame(width: 60, height: 60)
+                                        @unknown default:
+                                            Image(systemName: "photo")
+                                                .foregroundColor(.gray)
+                                                .frame(width: 60, height: 60)
+                                        }
+                                    }
+                                    .frame(width: 60, height: 60)
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(game.name)
+                                            .font(.headline)
+                                        Text("Joueurs: \(game.min_players)-\(game.max_players)")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(.leading, 8)
                                 }
+                                .padding(.vertical, 4)
                             }
                         }
                         .onDelete(perform: deleteGame)
