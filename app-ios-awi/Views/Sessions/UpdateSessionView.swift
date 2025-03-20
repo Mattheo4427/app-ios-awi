@@ -14,21 +14,72 @@ struct UpdateSessionView: View {
 
     var body: some View {
         Form {
-            TextField("Nom de la session", text: $session.name)
-            DatePicker("Date de début", selection: $session.date_begin, displayedComponents: .date)
-            DatePicker("Date de fin", selection: $session.date_end, displayedComponents: .date)
-            TextField("Frais de dépôt ($)", text: $session.deposit_fees)
-                .keyboardType(.decimalPad)
-            TextField("Remise (%)", text: $session.discount)
-                .keyboardType(.decimalPad)
-            TextField("Frais de commission ($)", text: $session.comission_fees)
-                .keyboardType(.decimalPad)
-
-            Button("Modifier Session") {
-                Task {
-                    await viewModel.updateSession(session: session)
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+            Section(header: Text("Informations générales")) {
+                VStack(alignment: .leading) {
+                    Text("Nom de la session")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $session.name)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Dates")) {
+                VStack(alignment: .leading) {
+                    Text("Date de début")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    DatePicker("", selection: $session.date_begin, displayedComponents: .date)
+                        .labelsHidden()
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Date de fin")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    DatePicker("", selection: $session.date_end, displayedComponents: .date)
+                        .labelsHidden()
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Paramètres financiers")) {
+                VStack(alignment: .leading) {
+                    Text("Frais de dépôt ($)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Montant", text: $session.deposit_fees)
+                        .keyboardType(.decimalPad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Remise (%)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Pourcentage", text: $session.discount)
+                        .keyboardType(.decimalPad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Frais de commission ($)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Montant", text: $session.comission_fees)
+                        .keyboardType(.decimalPad)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Modifier Session") {
+                    Task {
+                        await viewModel.updateSession(session: session)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

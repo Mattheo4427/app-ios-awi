@@ -16,19 +16,35 @@ struct CreateGameEditorView: View {
 
     var body: some View {
         Form {
-            TextField("Nom", text: $name)
-            TextField("Description", text: $descriptionText)
+            VStack(alignment: .leading) {
+                Text("Nom de l'éditeur")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                TextField("Nom", text: $name)
+            }
             
-            Button("Créer Editeur") {
-                Task {
-                    let newEditor = GameEditor(
-                        id_editor: Int.random(in: 1000...9999), // Temporary ID
-                        name: name,
-                        description: descriptionText.isEmpty ? nil : descriptionText
+            Section(header: Text("Description")) {
+                TextEditor(text: $descriptionText)
+                    .frame(minHeight: 150)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                     )
-                    await viewModel.createGameEditor(editor: newEditor)
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+                    .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Créer Editeur") {
+                    Task {
+                        let newEditor = GameEditor(
+                            id_editor: Int.random(in: 1000...9999), // Temporary ID
+                            name: name,
+                            description: descriptionText.isEmpty ? nil : descriptionText
+                        )
+                        await viewModel.createGameEditor(editor: newEditor)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

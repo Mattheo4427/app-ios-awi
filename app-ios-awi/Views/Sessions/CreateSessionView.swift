@@ -20,30 +20,81 @@ struct CreateSessionView: View {
 
     var body: some View {
         Form {
-            TextField("Nom de la session", text: $name)
-            DatePicker("Date de début", selection: $dateBegin, displayedComponents: .date)
-            DatePicker("Date de fin", selection: $dateEnd, displayedComponents: .date)
-            TextField("Frais de dépôt ($)", text: $depositFees)
-                .keyboardType(.decimalPad)
-            TextField("Remise (%)", text: $discount)
-                .keyboardType(.decimalPad)
-            TextField("Frais de commission ($)", text: $comissionFees)
-                .keyboardType(.decimalPad)
+            Section(header: Text("Informations générales")) {
+                VStack(alignment: .leading) {
+                    Text("Nom de la session")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $name)
+                }
+                .padding(.vertical, 4)
+            }
             
-            Button("Créer Session") {
-                Task {
-                    let newSession = Session(
-                        id_session: Int.random(in: 1000...9999), // Temporary ID
-                        name: name,
-                        date_begin: dateBegin,
-                        date_end: dateEnd,
-                        deposit_fees: (depositFees),
-                        discount: (discount),
-                        comission_fees: (comissionFees)
-                    )
-                    await viewModel.createSession(session: newSession)
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+            Section(header: Text("Dates")) {
+                VStack(alignment: .leading) {
+                    Text("Date de début")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    DatePicker("", selection: $dateBegin, displayedComponents: .date)
+                        .labelsHidden()
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Date de fin")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    DatePicker("", selection: $dateEnd, displayedComponents: .date)
+                        .labelsHidden()
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Paramètres financiers")) {
+                VStack(alignment: .leading) {
+                    Text("Frais de dépôt ($)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Montant", text: $depositFees)
+                        .keyboardType(.decimalPad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Remise (%)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Pourcentage", text: $discount)
+                        .keyboardType(.decimalPad)
+                }
+                .padding(.vertical, 4)
+                
+                VStack(alignment: .leading) {
+                    Text("Frais de commission ($)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Montant", text: $comissionFees)
+                        .keyboardType(.decimalPad)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Créer Session") {
+                    Task {
+                        let newSession = Session(
+                            id_session: Int.random(in: 1000...9999), // Temporary ID
+                            name: name,
+                            date_begin: dateBegin,
+                            date_end: dateEnd,
+                            deposit_fees: depositFees,
+                            discount: discount,
+                            comission_fees: comissionFees
+                        )
+                        await viewModel.createSession(session: newSession)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }

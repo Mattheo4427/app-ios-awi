@@ -17,19 +17,35 @@ struct UpdateGameCategoryView: View {
 
     var body: some View {
         Form {
-            TextField("Nom", text: $name)
-            TextField("Description", text: $descriptionText)
+            VStack(alignment: .leading) {
+                Text("Nom de la catégorie")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                TextField("Nom", text: $name)
+            }
             
-            Button("Modifier Catégorie") {
-                Task {
-                    let updatedCategory = GameCategory(
-                        id_category: category.id_category,
-                        name: name,
-                        description: descriptionText.isEmpty ? nil : descriptionText
+            Section(header: Text("Description")) {
+                TextEditor(text: $descriptionText)
+                    .frame(minHeight: 150)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                     )
-                    await viewModel.updateGameCategory(category: updatedCategory)
-                    if viewModel.errorMessage == nil {
-                        presentationMode.wrappedValue.dismiss()
+                    .padding(.vertical, 4)
+            }
+            
+            Section {
+                Button("Modifier Catégorie") {
+                    Task {
+                        let updatedCategory = GameCategory(
+                            id_category: category.id_category,
+                            name: name,
+                            description: descriptionText.isEmpty ? nil : descriptionText
+                        )
+                        await viewModel.updateGameCategory(category: updatedCategory)
+                        if viewModel.errorMessage == nil {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
             }
