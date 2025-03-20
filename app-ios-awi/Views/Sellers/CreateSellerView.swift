@@ -31,10 +31,10 @@ struct CreateSellerView: View {
             Button("Créer Vendeur") {
                 Task {
                     let newSeller = Seller(
-                        id_seller: UUID().uuidString, // Temporary ID using UUID
+                        id_seller: UUID().uuidString,
                         username: username,
                         email: email,
-                        password: "temporaryPassword", // Assuming you can manage password securely
+                        password: password, 
                         firstname: firstname,
                         lastname: lastname,
                         phone: phone,

@@ -51,14 +51,6 @@ struct LoginView: View {
                         
                     }
 
-                    // Display Backend Error Message
-                    if viewModel.showErrorMessage {
-                        Text(viewModel.errorMessage)
-                            .foregroundColor(.red)
-                            .font(.footnote)
-                            .padding(.horizontal)
-                    }
-
                     Button(action: {
                         Task {
                             await viewModel.login()
@@ -94,6 +86,14 @@ struct LoginView: View {
             .fullScreenCover(isPresented: $viewModel.loginSuccess) {
                 HomeView()
             }
+            .alert("Erreur", isPresented: Binding<Bool>(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.dismissError() } }
+            ), actions: {
+                Button("OK", role: .cancel) { }
+            }, message: {
+                Text(viewModel.errorMessage ?? "")
+            })
         }
     }
 }

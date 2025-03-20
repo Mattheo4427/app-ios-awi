@@ -36,7 +36,7 @@ struct CreateManagerView: View {
                         id_manager: UUID().uuidString, // Temporary ID using UUID
                         username: username,
                         email: email,
-                        password: "temporaryPassword", // Assuming password handling
+                        password: password,
                         firstname: firstname,
                         lastname: lastname,
                         phone: phone,

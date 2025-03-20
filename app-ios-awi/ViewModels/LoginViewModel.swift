@@ -13,7 +13,7 @@ class LoginViewModel: ObservableObject {
     @Published var password = ""
     @Published var isPasswordSecure = true
     @Published var showErrorMessage = false
-    @Published var errorMessage: String = ""
+    @Published var errorMessage: String? = nil
     @Published var isLoading = false
     @Published var loginSuccess = false
 
@@ -30,7 +30,6 @@ class LoginViewModel: ObservableObject {
     func login() async {
         guard validateCredentials() else {
             DispatchQueue.main.async {
-                self.showErrorMessage = true
                 self.errorMessage = "Entrez un email et mot de passe valides."
             }
             return
@@ -38,7 +37,7 @@ class LoginViewModel: ObservableObject {
 
         DispatchQueue.main.async {
             self.isLoading = true
-            self.showErrorMessage = false
+            self.errorMessage = nil
         }
 
         let parameters = ["email": email, "password": password]
@@ -87,11 +86,10 @@ class LoginViewModel: ObservableObject {
                     self.showErrorMessage = true
                     self.errorMessage = "Erreur inconnue."
                 }
-            
+
         } catch let networkError as NetworkError {
             DispatchQueue.main.async {
                 self.isLoading = false
-                self.showErrorMessage = true
                 
                 // Get specific network error message
                 switch networkError {
@@ -99,8 +97,12 @@ class LoginViewModel: ObservableObject {
                     self.errorMessage = "URL invalide."
                 case .invalidMethod:
                     self.errorMessage = "Méthode de requête invalide."
-                case .requestFailed(let statusCode):
-                    self.errorMessage = "Échec de la requête avec le code: \(statusCode)."
+                case .requestFailed(let statusCode, let message):
+                    if let backendMessage = message, !backendMessage.isEmpty {
+                        self.errorMessage = backendMessage
+                    } else {
+                        self.errorMessage = "Échec de la requête avec le code: \(statusCode)."
+                    }
                 case .noData:
                     self.errorMessage = "Aucune donnée reçue."
                 case .decodingError(let message):
@@ -110,7 +112,6 @@ class LoginViewModel: ObservableObject {
         } catch {
             DispatchQueue.main.async {
                 self.isLoading = false
-                self.showErrorMessage = true
                 self.errorMessage = "Erreur réseau: \(error.localizedDescription)"
             }
         }
@@ -158,6 +159,11 @@ class LoginViewModel: ObservableObject {
         print("⚠️ No role information found, defaulting to client")
         return "client"
     }
+
+    func dismissError() {
+        self.errorMessage = nil
+    }
+    
 }
 
 // Structs to handle responses
