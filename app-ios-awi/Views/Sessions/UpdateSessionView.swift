@@ -27,10 +27,20 @@ struct UpdateSessionView: View {
             Button("Modifier Session") {
                 Task {
                     await viewModel.updateSession(session: session)
-                    presentationMode.wrappedValue.dismiss()
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Modification Session")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

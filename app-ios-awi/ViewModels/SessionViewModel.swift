@@ -13,8 +13,8 @@ class SessionViewModel: ObservableObject {
     @Published var sessions: [Session] = []
     private let endpoint = "sessions/"
     
-    // Add the token from AppStorage like in ManagerViewModel
     @AppStorage("authToken") private var authToken = ""
+    @Published var errorMessage: String? = nil
 
     // Fetch all sessions
     func fetchSessions() async {
@@ -53,8 +53,11 @@ class SessionViewModel: ObservableObject {
             if let newSession: Session = decodeJSON(from: data, as: Session.self) {
                 self.sessions.append(newSession)
             }
+            self.errorMessage = nil
+        } catch let networkError as NetworkError {
+            handleError(networkError)
         } catch {
-            print("Erreur création session:", error)
+            self.errorMessage = "Erreur: \(error.localizedDescription)"
         }
     }
 
@@ -71,8 +74,11 @@ class SessionViewModel: ObservableObject {
                     self.sessions[index] = updatedSession
                 }
             }
+            self.errorMessage = nil
+        } catch let networkError as NetworkError {
+            handleError(networkError)
         } catch {
-            print("Erreur modification session:", error)
+            self.errorMessage = "Erreur: \(error.localizedDescription)"
         }
     }
 
@@ -84,5 +90,32 @@ class SessionViewModel: ObservableObject {
         } catch {
             print("Erreur suppression session:", error)
         }
+    }
+    
+    // Centralized error handling
+    private func handleError(_ error: NetworkError) {
+        switch error {
+        case .requestFailed(let statusCode, let message):
+            if statusCode == 401 {
+                self.errorMessage = "Authentification nécessaire"
+            } else if let backendMessage = message, !backendMessage.isEmpty {
+                // Use the backend's message directly
+                self.errorMessage = backendMessage
+            } else {
+                self.errorMessage = "Erreur serveur (\(statusCode))"
+            }
+        case .invalidURL:
+            self.errorMessage = "URL invalide"
+        case .invalidMethod:
+            self.errorMessage = "Méthode invalide"
+        case .noData:
+            self.errorMessage = "Aucune donnée reçue"
+        case .decodingError(let message):
+            self.errorMessage = "Erreur de décodage: \(message)"
+        }
+    }
+    
+    func dismissError() {
+        self.errorMessage = nil
     }
 }	

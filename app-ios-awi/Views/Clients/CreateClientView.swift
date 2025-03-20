@@ -36,10 +36,21 @@ struct CreateClientView: View {
                         address: address.isEmpty ? nil : address
                     )
                     await viewModel.createClient(client: newClient)
-                    presentationMode.wrappedValue.dismiss()
+                    // Only dismiss if there was no error
+                    if viewModel.errorMessage == nil {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
         .navigationTitle("Nouveau Client")
+        .alert("Erreur", isPresented: Binding<Bool>(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        ), actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

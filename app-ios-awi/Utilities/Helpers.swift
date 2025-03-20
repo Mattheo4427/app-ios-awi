@@ -10,7 +10,7 @@ import Foundation
 enum NetworkError: Error {
     case invalidURL
     case invalidMethod
-    case requestFailed(statusCode: Int)
+    case requestFailed(statusCode: Int, message: String?)
     case noData
     case decodingError(String)
 }
@@ -53,7 +53,7 @@ func fetchData(from urlPath: String, reqMethod: String = "GET", body: Data? = ni
         
         guard let httpResponse = response as? HTTPURLResponse else {
             print("🔴 Network Error: Invalid response type")
-            throw NetworkError.requestFailed(statusCode: 0)
+            throw NetworkError.requestFailed(statusCode: 0, message: "Invalid response type")
         }
         
         print("🟢 Response Status: \(httpResponse.statusCode)")
@@ -64,10 +64,30 @@ func fetchData(from urlPath: String, reqMethod: String = "GET", body: Data? = ni
             }
             return data
         } else {
+            var errorMessage: String? = nil
+            
+            // Try to extract error message from the response
+            do {
+                if let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    // Handle message as array or string
+                    if let messageArray = jsonObject["message"] as? [String], !messageArray.isEmpty {
+                        errorMessage = messageArray.joined(separator: ", ")
+                    } else if let message = jsonObject["message"] as? String {
+                        errorMessage = message
+                    } else if let error = jsonObject["error"] as? String {
+                        errorMessage = error
+                    }
+                }
+            } catch {
+                // Fallback to raw response if JSON parsing fails
+                errorMessage = String(data: data, encoding: .utf8)
+            }
+            
             if let responseString = String(data: data, encoding: .utf8) {
                 print("🔴 Error Response: \(responseString)")
             }
-            throw NetworkError.requestFailed(statusCode: httpResponse.statusCode)
+            
+            throw NetworkError.requestFailed(statusCode: httpResponse.statusCode, message: errorMessage)
         }
     } catch {
         print("🔴 Network Error: \(error.localizedDescription)")

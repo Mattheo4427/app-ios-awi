@@ -83,9 +83,12 @@ class ManagerViewModel: ObservableObject {
     // Centralized error handling
     private func handleError(_ error: NetworkError) {
         switch error {
-        case .requestFailed(let statusCode):
+        case .requestFailed(let statusCode, let message):
             if statusCode == 401 {
                 self.errorMessage = "Authentification nécessaire"
+            } else if let backendMessage = message, !backendMessage.isEmpty {
+                // Use the backend's message directly
+                self.errorMessage = backendMessage
             } else {
                 self.errorMessage = "Erreur serveur (\(statusCode))"
             }
@@ -98,5 +101,9 @@ class ManagerViewModel: ObservableObject {
         case .decodingError(let message):
             self.errorMessage = "Erreur de décodage: \(message)"
         }
+    }
+    
+    func dismissError() {
+        self.errorMessage = nil
     }
 }
