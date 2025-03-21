@@ -18,44 +18,86 @@ class DepositViewModel: ObservableObject {
     
     func fetchDeposits() async {
         do {
-            let data = try await fetchData(from: endpoint, token: authToken)
-            
-            if let fetchedDeposits: [Deposit] = decodeJSON(from: data, as: [Deposit].self) {
-                self.deposits = fetchedDeposits
-                self.errorMessage = nil
-            }
-        } catch let networkError as NetworkError {
-            handleError(networkError)
-        } catch {
-            self.errorMessage = "Erreur: \(error.localizedDescription)"
-        }
-    }
-    
-    func createDeposit(deposit: Deposit) async {
-        do {
-            let body = try JSONEncoder().encode(deposit)
-            let data = try await fetchData(from: endpoint, reqMethod: "POST", body: body, token: authToken)
-            
-            if let newDeposit: Deposit = decodeJSON(from: data, as: Deposit.self) {
-                self.deposits.append(newDeposit)
-                self.errorMessage = nil
-            }
-        } catch let networkError as NetworkError {
-            handleError(networkError)
-        } catch {
-            self.errorMessage = "Erreur: \(error.localizedDescription)"
-        }
-    }
-    
-    func updateDeposit(deposit: Deposit) async {
-        do {
-            let body = try JSONEncoder().encode(deposit)
-            let data = try await fetchData(from: "\(endpoint)update/\(deposit.id_deposit)", reqMethod: "PUT", body: body, token: authToken)
-            
-            if let updatedDeposit: Deposit = decodeJSON(from: data, as: Deposit.self) {
-                if let index = self.deposits.firstIndex(where: { $0.id_deposit == updatedDeposit.id_deposit }) {
-                    self.deposits[index] = updatedDeposit
+            if let data = try await fetchData(from: endpoint, token: authToken) {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .custom { decoder -> Date in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    let formatter = ISO8601DateFormatter()
+                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+                }
+                
+                if let fetchedDeposits = try? decoder.decode([Deposit].self, from: data) {
+                    self.deposits = fetchedDeposits
                     self.errorMessage = nil
+                }
+            }
+        } catch let networkError as NetworkError {
+            handleError(networkError)
+        } catch {
+            self.errorMessage = "Erreur: \(error.localizedDescription)"
+        }
+    }
+    
+    func createDeposit(deposit: CreateDepositDto) async {
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let body = try encoder.encode(deposit)
+            
+            if let data = try await fetchData(from: endpoint, reqMethod: "POST", body: body, token: authToken) {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .custom { decoder -> Date in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    let formatter = ISO8601DateFormatter()
+                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+                }
+                
+                if let newDeposit = try? decoder.decode(Deposit.self, from: data) {
+                    self.deposits.append(newDeposit)
+                    self.errorMessage = nil
+                }
+            }
+        } catch let networkError as NetworkError {
+            handleError(networkError)
+        } catch {
+            self.errorMessage = "Erreur: \(error.localizedDescription)"
+        }
+    }
+    
+    func updateDeposit(deposit: UpdateDepositDto) async {
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let body = try encoder.encode(deposit)
+            
+            if let data = try await fetchData(from: "\(endpoint)update/\(deposit.id_deposit)", reqMethod: "PUT", body: body, token: authToken) {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .custom { decoder -> Date in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    let formatter = ISO8601DateFormatter()
+                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+                }
+                
+                if let updatedDeposit = try? decoder.decode(Deposit.self, from: data) {
+                    if let index = self.deposits.firstIndex(where: { $0.id_deposit == updatedDeposit.id_deposit }) {
+                        self.deposits[index] = updatedDeposit
+                        self.errorMessage = nil
+                    }
                 }
             }
         } catch let networkError as NetworkError {
@@ -98,5 +140,9 @@ class DepositViewModel: ObservableObject {
         case .decodingError(let message):
             self.errorMessage = "Erreur de décodage: \(message)"
         }
+    }
+    
+    func dismissError() {
+        self.errorMessage = nil
     }
 }

@@ -2,8 +2,6 @@
 //  HomeView.swift
 //  app-ios-awi
 //
-//  Created by etud on 17/03/2025.
-//
 
 import SwiftUI
 
@@ -35,7 +33,7 @@ struct HomeView: View {
                             .padding(.top, 4)
                     }
                     .padding()
-                } else if viewModel.categories.isEmpty && viewModel.games.isEmpty {
+                } else if viewModel.mergedGames.isEmpty {
                     VStack {
                         Image(systemName: "book.closed")
                             .font(.system(size: 50))
@@ -47,7 +45,7 @@ struct HomeView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
                         
-                        Text("Aucun jeu ou catégorie n'est disponible pour le moment.")
+                        Text("Aucun jeu n'est disponible pour le moment.")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -71,20 +69,80 @@ struct HomeView: View {
                     .padding()
                 } else {
                     List {
-                        if !viewModel.categories.isEmpty {
-                            Section(header: Text("Catégories")) {
-                                ForEach(viewModel.categories, id: \.id) { category in
-                                    Text(category.name)
+                        ForEach(viewModel.mergedGames) { mergedGame in
+                            VStack(alignment: .leading) {
+                                if let gameDetails = mergedGame.gameDetails {
+                                    HStack(alignment: .top, spacing: 12) {
+                                        // Game image
+                                        AsyncImage(url: URL(string: gameDetails.image ?? "")) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                                    .frame(width: 80, height: 80)
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 80, height: 80)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            case .failure:
+                                                Image(systemName: "photo")
+                                                    .foregroundColor(.gray)
+                                                    .frame(width: 80, height: 80)
+                                            @unknown default:
+                                                Image(systemName: "photo")
+                                                    .foregroundColor(.gray)
+                                                    .frame(width: 80, height: 80)
+                                            }
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(gameDetails.name)
+                                                .font(.headline)
+                                            
+                                            HStack {
+                                                Text("👥 \(gameDetails.min_players)-\(gameDetails.max_players)")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                                Text("📅 \(gameDetails.min_age)-\(gameDetails.max_age) ans")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            
+                                            if let description = gameDetails.description {
+                                                Text(description)
+                                                    .lineLimit(2)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            
+                                            Spacer().frame(height: 8)
+                                            
+                                            HStack {
+                                                Text("💰 \(mergedGame.price)€")
+                                                    .font(.headline)
+                                                    .foregroundColor(.blue)
+                                                
+                                                Spacer()
+                                                
+                                                Text("📦 \(mergedGame.count) disponible\(mergedGame.count > 1 ? "s" : "")")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.green)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Simple view for when game details haven't loaded yet
+                                    HStack {
+                                        Text("Jeu #\(mergedGame.gameId)")
+                                            .font(.headline)
+                                        Spacer()
+                                        Text("\(mergedGame.price)€ × \(mergedGame.count)")
+                                            .font(.subheadline)
+                                    }
                                 }
                             }
-                        }
-                        
-                        if !viewModel.games.isEmpty {
-                            Section(header: Text("Jeux")) {
-                                ForEach(viewModel.games, id: \.id) { game in
-                                    Text(game.tag) // Adjusted to use the correct property
-                                }
-                            }
+                            .padding(.vertical, 8)
                         }
                     }
                 }
@@ -95,12 +153,9 @@ struct HomeView: View {
                     await viewModel.fetchCatalogue()
                 }
             }
+            .refreshable {
+                await viewModel.fetchCatalogue()
+            }
         }
-    }
-}
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
     }
 }

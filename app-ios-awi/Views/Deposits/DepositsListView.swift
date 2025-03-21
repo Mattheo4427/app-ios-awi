@@ -1,21 +1,16 @@
-//
-//  DepositsListView.swift
-//  app-ios-awi
-//
-//  Created by etud on 18/03/2025.
-//
-
 import SwiftUI
 
 struct DepositsListView: View {
     @StateObject var viewModel = DepositViewModel()
+    @State private var showDeleteAlert = false
+    @State private var depositToDelete: String?
     
     var body: some View {
         NavigationView {
             Group {
                 if viewModel.deposits.isEmpty {
                     VStack {
-                        Image(systemName: "dollarsign.circle")
+                        Image(systemName: "tray.fill")
                             .font(.system(size: 50))
                             .foregroundColor(.gray)
                             .padding()
@@ -31,16 +26,20 @@ struct DepositsListView: View {
                 } else {
                     List {
                         ForEach(viewModel.deposits) { deposit in
-                            NavigationLink(destination: UpdateDepositView(viewModel: viewModel, deposit: deposit)) {
-                                VStack(alignment: .leading) {
-                                    Text("Deposit ID: \(deposit.id_deposit)")
-                                        .font(.headline)
-                                    Text("Total: \(deposit.total_price, specifier: "%.2f")")
-                                        .font(.subheadline)
-                                }
+                            // Regular view instead of NavigationLink
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Dépôt #\(deposit.id_deposit)")
+                                    .font(.headline)
+                                Text("Date: \(formattedDate(deposit.date))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("Montant: \(deposit.amount, specifier: "%.2f") €")
+                                    .font(.subheadline)
+                                    .foregroundColor(.blue)
                             }
+                            .padding(.vertical, 4)
                         }
-                        .onDelete(perform: deleteDeposit)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -53,15 +52,41 @@ struct DepositsListView: View {
             .task {
                 await viewModel.fetchDeposits()
             }
+            .refreshable {
+                await viewModel.fetchDeposits()
+            }
+            .alert("Erreur", isPresented: Binding<Bool>(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.dismissError() }}
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
+            .alert("Supprimer le dépôt", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let depositID = depositToDelete {
+                        Task { await viewModel.deleteDeposit(depositID: depositID) }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer ce dépôt ? Cette action est irréversible.")
+            }
         }
     }
     
-    func deleteDeposit(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let depositID = viewModel.deposits[index].id_deposit
-                await viewModel.deleteDeposit(depositID: depositID)
-            }
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            depositToDelete = viewModel.deposits[index].id_deposit
+            showDeleteAlert = true
         }
+    }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
     }
 }
