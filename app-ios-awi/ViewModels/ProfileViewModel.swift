@@ -7,26 +7,74 @@
 
 import SwiftUI
 
+struct ManagerProfile: Codable {
+    let id_manager: String
+    let username: String
+    let email: String
+    let is_admin: Bool
+}
+
 class ProfileViewModel: ObservableObject {
     @AppStorage("isLoggedIn") var isLoggedIn = false
-    @AppStorage("userRole") var userRole = "client"
+    @AppStorage("is_admin") var is_admin = false
     @AppStorage("authToken") var authToken = ""
-    
+
     @Published var showLogoutConfirmation = false
     @Published var navigateToLogin = false
-    
+    @Published var managerProfile: ManagerProfile?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    var username: String {
+        managerProfile?.username ?? "Utilisateur inconnu"
+    }
+
+    var email: String {
+        managerProfile?.email ?? "Email inconnu"
+    }
+
+    func fetchProfile() async {
+        guard !authToken.isEmpty else {
+            DispatchQueue.main.async {
+                self.errorMessage = "Aucun token d'authentification disponible."
+            }
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.isLoading = true
+            self.errorMessage = nil
+        }
+
+        do {
+            let data = try await fetchData(from: "managers/get/current", token: authToken)
+            if let profile = decodeJSON(from: data, as: ManagerProfile.self) {
+                DispatchQueue.main.async {
+                    self.managerProfile = profile
+                    self.is_admin = profile.is_admin
+                }
+                print("🟢 Profile fetched successfully: \(profile.username)")
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Impossible de charger le profil."
+            }
+            print("🔴 Failed to fetch profile: \(error)")
+        }
+
+        DispatchQueue.main.async {
+            self.isLoading = false
+        }
+    }
+
     func logout() {
-        // Clear auth credentials and user data
         isLoggedIn = false
-        userRole = "client"
+        is_admin = false
         authToken = ""
-        
-        // Force refresh AppStorage values
+
         UserDefaults.standard.synchronize()
-        
-        // Set flag to navigate back to login screen
         navigateToLogin = true
-        
         print("🚪 User logged out successfully")
     }
 }
+
