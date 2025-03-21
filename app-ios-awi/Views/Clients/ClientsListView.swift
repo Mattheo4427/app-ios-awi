@@ -37,12 +37,47 @@ struct ClientsListView: View {
                     List {
                         ForEach(viewModel.clients) { client in
                             NavigationLink(destination: UpdateClientView(viewModel: viewModel, client: client)) {
-                                VStack(alignment: .leading) {
+                                VStack(alignment: .leading, spacing: 8) {
                                     Text("\(client.firstname) \(client.lastname)")
                                         .font(.headline)
-                                    Text(client.email)
-                                        .foregroundColor(.gray)
+                                    
+                                    Label {
+                                        Text(client.email)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    } icon: {
+                                        Image(systemName: "envelope")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+                                    
+                                    if !client.phone.isEmpty {
+                                        Label {
+                                            Text(client.phone)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        } icon: {
+                                            Image(systemName: "phone")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    
+                                    if let address = client.address, !address.isEmpty {
+                                        Label {
+                                            Text(address)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.tail)
+                                        } icon: {
+                                            Image(systemName: "mappin.and.ellipse")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
                                 }
+                                .padding(.vertical, 6)
                             }
                         }
                         .onDelete(perform: deleteClient)

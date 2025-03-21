@@ -10,6 +10,8 @@ import SwiftUI
 struct UpdateGameView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: GameViewModel
+    @StateObject private var editorViewModel = GameEditorViewModel()
+    @StateObject private var categoryViewModel = GameCategoryViewModel()
     @State var game: Game
 
     @State private var name = ""
@@ -19,18 +21,22 @@ struct UpdateGameView: View {
     @State private var maxPlayers = ""
     @State private var minAge = ""
     @State private var maxAge = ""
-    @State private var idEditor = ""
-    @State private var idCategory = ""
+    @State private var selectedEditor: GameEditor?
+    @State private var selectedCategory: GameCategory?
 
     var body: some View {
         Form {
-            VStack(alignment: .leading) {
-                Text("Nom du jeu")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                TextField("Nom", text: $name)
+            // Name section
+            Section {
+                VStack(alignment: .leading) {
+                    Text("Nom du jeu")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("Nom", text: $name)
+                }
             }
             
+            // Description section
             Section(header: Text("Description")) {
                 TextEditor(text: $descriptionText)
                     .frame(minHeight: 150)
@@ -38,13 +44,14 @@ struct UpdateGameView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                     )
-                    .padding(.vertical, 4)
             }
             
+            // Media section
             Section(header: Text("Média")) {
                 TextField("Image URL", text: $image)
             }
             
+            // Players section
             Section(header: Text("Nombre de joueurs")) {
                 HStack {
                     VStack(alignment: .leading) {
@@ -67,6 +74,7 @@ struct UpdateGameView: View {
                 }
             }
 
+            // Age section
             Section(header: Text("Âge recommandé")) {
                 HStack {
                     VStack(alignment: .leading) {
@@ -88,28 +96,59 @@ struct UpdateGameView: View {
                     }
                 }
             }
-
             
+            // References section
             Section(header: Text("Références")) {
+                // Editor picker
                 VStack(alignment: .leading) {
                     Text("Éditeur")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    TextField("ID Éditeur", text: $idEditor)
-                        .keyboardType(.numberPad)
+                    
+                    if editorViewModel.gameEditors.isEmpty {
+                        Text("Chargement des éditeurs...")
+                            .foregroundColor(.gray)
+                    } else {
+                        Menu {
+                            ForEach(editorViewModel.gameEditors) { editor in
+                                Button(editor.name) {
+                                    selectedEditor = editor
+                                }
+                            }
+                        } label: {
+                            Text(selectedEditor?.name ?? "Sélectionner un éditeur")
+                                .foregroundColor(selectedEditor == nil ? .gray : .primary)
+                        }
+                    }
                 }
                 .padding(.vertical, 4)
                 
+                // Category picker
                 VStack(alignment: .leading) {
                     Text("Catégorie")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    TextField("ID Catégorie", text: $idCategory)
-                        .keyboardType(.numberPad)
+                    
+                    if categoryViewModel.gameCategories.isEmpty {
+                        Text("Chargement des catégories...")
+                            .foregroundColor(.gray)
+                    } else {
+                        Menu {
+                            ForEach(categoryViewModel.gameCategories) { category in
+                                Button(category.name) {
+                                    selectedCategory = category
+                                }
+                            }
+                        } label: {
+                            Text(selectedCategory?.name ?? "Sélectionner une catégorie")
+                                .foregroundColor(selectedCategory == nil ? .gray : .primary)
+                        }
+                    }
                 }
                 .padding(.vertical, 4)
-            }       
+            }     
             
+            // Update button section
             Section {
                 Button("Modifier Jeu") {
                     Task {
@@ -122,8 +161,8 @@ struct UpdateGameView: View {
                             max_players: Int(maxPlayers) ?? 0,
                             min_age: Int(minAge) ?? 0,
                             max_age: Int(maxAge) ?? 0,
-                            id_editor: Int(idEditor) ?? 0,
-                            id_category: Int(idCategory) ?? 0
+                            id_editor: selectedEditor?.id_editor ?? 0,
+                            id_category: selectedCategory?.id_category ?? 0
                         )
                         await viewModel.updateGame(game: updatedGame)
                         if viewModel.errorMessage == nil {
@@ -131,18 +170,30 @@ struct UpdateGameView: View {
                         }
                     }
                 }
+                .disabled(selectedEditor == nil || selectedCategory == nil)
             }
         }
         .navigationTitle("Modification Jeu")
         .alert("Erreur", isPresented: Binding<Bool>(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.dismissError() } }
+            get: { viewModel.errorMessage != nil || editorViewModel.errorMessage != nil || categoryViewModel.errorMessage != nil },
+            set: { if !$0 { 
+                viewModel.dismissError()
+                editorViewModel.dismissError()
+                categoryViewModel.dismissError()
+            }}
         ), actions: {
             Button("OK", role: .cancel) { }
         }, message: {
-            Text(viewModel.errorMessage ?? "")
+            if let error = viewModel.errorMessage {
+                Text(error)
+            } else if let error = editorViewModel.errorMessage {
+                Text(error)
+            } else {
+                Text(categoryViewModel.errorMessage ?? "")
+            }
         })
         .onAppear {
+            // Load data from existing game
             name = game.name
             descriptionText = game.description ?? ""
             image = game.image ?? ""
@@ -150,8 +201,16 @@ struct UpdateGameView: View {
             maxPlayers = "\(game.max_players)"
             minAge = "\(game.min_age)"
             maxAge = "\(game.max_age)"
-            idEditor = "\(game.id_editor)"
-            idCategory = "\(game.id_category)"
+            
+            // Fetch editors and categories
+            Task {
+                await editorViewModel.fetchGameEditors()
+                await categoryViewModel.fetchGameCategories()
+                
+                // Set selected editor and category based on game data
+                selectedEditor = editorViewModel.gameEditors.first(where: { $0.id_editor == game.id_editor })
+                selectedCategory = categoryViewModel.gameCategories.first(where: { $0.id_category == game.id_category })
+            }
         }
     }
 }
