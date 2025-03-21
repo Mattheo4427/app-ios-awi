@@ -1,19 +1,34 @@
 //
-//  DepositedGame.swift
+//  GameModels.swift
 //  app-ios-awi
-//
-//  Created by etud on 17/03/2025.
 //
 
 import Foundation
 
-struct DepositedGame: Identifiable, Codable {
-    let tag: String
-    let price: Double
-    let quantity: Int
-    let number_for_sale: Int
-    let id_seller: String
-    let id_game: Int
-    
+struct DepositedGame: Identifiable, Decodable {
     var id: String { tag }
+    let tag: String
+    let price: String
+    let sold: Bool
+    let forSale: Bool
+    let idSession: Int
+    let idSeller: String
+    let idGame: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case tag, price, sold
+        case forSale = "for_sale"
+        case idSession = "id_session"
+        case idSeller = "id_seller"
+        case idGame = "id_game"
+    }
+}
+
+struct MergedGame: Identifiable {
+    let id = UUID()
+    let gameId: Int
+    let price: String
+    let sellerId: String
+    let count: Int
+    var gameDetails: Game?
 }
