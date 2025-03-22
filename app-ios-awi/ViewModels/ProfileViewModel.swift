@@ -10,8 +10,13 @@ import SwiftUI
 struct ManagerProfile: Codable {
     let id_manager: String
     let username: String
+    let firstname: String
+    let lastname: String
     let email: String
+    let phone: String
+    let address: String?
     let is_admin: Bool
+    let createdAt: String
 }
 
 class ProfileViewModel: ObservableObject {
