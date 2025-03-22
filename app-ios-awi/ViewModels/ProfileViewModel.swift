@@ -15,15 +15,19 @@ struct ManagerProfile: Codable {
 }
 
 class ProfileViewModel: ObservableObject {
-    @AppStorage("isLoggedIn") var isLoggedIn = false
-    @AppStorage("is_admin") var is_admin = false
     @AppStorage("authToken") var authToken = ""
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+    @AppStorage("userRole") var userRole = "client"
 
     @Published var showLogoutConfirmation = false
     @Published var navigateToLogin = false
     @Published var managerProfile: ManagerProfile?
     @Published var isLoading = false
     @Published var errorMessage: String?
+
+    var isAuthenticated: Bool {
+        !authToken.isEmpty
+    }
 
     var username: String {
         managerProfile?.username ?? "Utilisateur inconnu"
@@ -33,8 +37,29 @@ class ProfileViewModel: ObservableObject {
         managerProfile?.email ?? "Email inconnu"
     }
 
+    var isAdmin: Bool {
+        managerProfile?.is_admin ?? false
+    }
+
+    init() {
+        checkAuthState()
+    }
+
+    /// Vérifie l'état d'authentification au démarrage
+    func checkAuthState() {
+        if authToken.isEmpty {
+            print("🔍 Aucun token trouvé, réinitialisation de l'état d'authentification.")
+            isLoggedIn = false
+            userRole = "client"
+        } else {
+            print("✅ Token trouvé, utilisateur authentifié.")
+            isLoggedIn = true
+        }
+    }
+
+    /// Récupère le profil de l'utilisateur
     func fetchProfile() async {
-        guard !authToken.isEmpty else {
+        guard isAuthenticated else {
             DispatchQueue.main.async {
                 self.errorMessage = "Aucun token d'authentification disponible."
             }
@@ -51,15 +76,15 @@ class ProfileViewModel: ObservableObject {
             if let profile = decodeJSON(from: data, as: ManagerProfile.self) {
                 DispatchQueue.main.async {
                     self.managerProfile = profile
-                    self.is_admin = profile.is_admin
+                    self.userRole = profile.is_admin ? "admin" : "client"
                 }
-                print("🟢 Profile fetched successfully: \(profile.username)")
+                print("🟢 Profil chargé avec succès: \(profile.username)")
             }
         } catch {
             DispatchQueue.main.async {
                 self.errorMessage = "Impossible de charger le profil."
             }
-            print("🔴 Failed to fetch profile: \(error)")
+            print("🔴 Échec du chargement du profil: \(error)")
         }
 
         DispatchQueue.main.async {
@@ -67,14 +92,26 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
+    /// Déconnecte l'utilisateur et réinitialise les valeurs
     func logout() {
-        isLoggedIn = false
-        is_admin = false
-        authToken = ""
-
+        UserDefaults.standard.removeObject(forKey: "authToken")
+        UserDefaults.standard.removeObject(forKey: "isLoggedIn")
+        UserDefaults.standard.removeObject(forKey: "userRole")
         UserDefaults.standard.synchronize()
-        navigateToLogin = true
-        print("🚪 User logged out successfully")
+
+        DispatchQueue.main.async {
+            self.authToken = ""
+            self.isLoggedIn = false
+            self.userRole = "client"
+            self.managerProfile = nil
+            self.navigateToLogin = true
+        }
+
+        print("🚪 Déconnexion réussie. isLoggedIn = \(isLoggedIn), userRole = \(userRole), authToken supprimé.")
+    }
+
+    /// Affiche les valeurs stockées pour debug
+    func printAppStorageValues() {
+        print("🔍 isLoggedIn: \(isLoggedIn), userRole: \(userRole), authToken: \(authToken)")
     }
 }
-

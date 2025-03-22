@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
-    
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -28,7 +28,7 @@ struct ProfileView: View {
                             .padding(.top, 4)
                     }
                     .padding()
-                } else if let managerProfile = viewModel.managerProfile {
+                } else if viewModel.isAuthenticated, let managerProfile = viewModel.managerProfile {
                     VStack(spacing: 16) {
                         Image(systemName: "person.crop.circle")
                             .font(.system(size: 80))
@@ -43,6 +43,12 @@ struct ProfileView: View {
                             .font(.body)
                             .foregroundColor(.secondary)
                         
+                        if viewModel.isAdmin {
+                            Text("Administrateur")
+                                .font(.headline)
+                                .foregroundColor(.red)
+                        }
+                        
                         Button(action: {
                             Task {
                                 await viewModel.fetchProfile()
@@ -54,8 +60,32 @@ struct ProfileView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }
+                        
+                        Button(action: {
+                            viewModel.logout()
+                        }) {
+                            Text("Se déconnecter")
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
                     }
                     .padding()
+                } else {
+                    VStack {
+                        Text("Vous n'êtes pas connecté.")
+                            .font(.title2)
+                            .padding()
+
+                        Button("Se connecter") {
+                            viewModel.navigateToLogin = true
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
                 }
             }
             .navigationBarTitle("Profil", displayMode: .inline)
@@ -63,10 +93,12 @@ struct ProfileView: View {
                 Task {
                     await viewModel.fetchProfile()
                 }
+                viewModel.printAppStorageValues()
             }
         }
     }
 }
+
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
