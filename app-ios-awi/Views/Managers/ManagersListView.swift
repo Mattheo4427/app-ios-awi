@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ManagersListView: View {
     @StateObject var viewModel = ManagerViewModel()
+    @State private var showDeleteAlert = false
+    @State private var managerToDelete: String?  // Changed from Int? to String?
 
     var body: some View {
         NavigationView {
@@ -102,7 +104,7 @@ struct ManagersListView: View {
                                 .padding(.vertical, 6)
                             }
                         }
-                        .onDelete(perform: deleteManager)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -115,15 +117,25 @@ struct ManagersListView: View {
             .task {
                 await viewModel.fetchManagers()
             }
+            .alert("Supprimer le manager", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let managerID = managerToDelete {
+                        Task {
+                            await viewModel.deleteManager(managerID: managerID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer ce manager ? Cette action est irréversible.")
+            }
         }
     }
 
-    func deleteManager(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let managerID = viewModel.managers[index].id_manager
-                await viewModel.deleteManager(managerID: managerID)
-            }
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            managerToDelete = viewModel.managers[index].id_manager
+            showDeleteAlert = true
         }
     }
 }

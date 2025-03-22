@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SessionsListView: View {
     @StateObject var viewModel = SessionViewModel()
+    @State private var showDeleteAlert = false
+    @State private var sessionToDelete: Int?
 
     var body: some View {
         NavigationView {
@@ -47,7 +49,7 @@ struct SessionsListView: View {
                                 }
                             }
                         }
-                        .onDelete(perform: deleteSession)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -60,15 +62,25 @@ struct SessionsListView: View {
             .task {
                 await viewModel.fetchSessions()
             }
+            .alert("Supprimer la session", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let sessionID = sessionToDelete {
+                        Task {
+                            await viewModel.deleteSession(sessionID: sessionID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer cette session ? Cette action est irréversible.")
+            }
         }
     }
 
-    func deleteSession(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let sessionID = viewModel.sessions[index].id_session
-                await viewModel.deleteSession(sessionID: sessionID)
-            }
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            sessionToDelete = viewModel.sessions[index].id_session
+            showDeleteAlert = true
         }
     }
 

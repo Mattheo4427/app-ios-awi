@@ -18,7 +18,8 @@ class DepositViewModel: ObservableObject {
     
     func fetchDeposits() async {
         do {
-            if let data = try await fetchData(from: endpoint, token: authToken) {
+            // First fetch the open session
+            if let sessionData = try await fetchData(from: "sessions/opened", token: authToken) {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .custom { decoder -> Date in
                     let container = try decoder.singleValueContainer()
@@ -31,9 +32,24 @@ class DepositViewModel: ObservableObject {
                     throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
                 }
                 
-                if let fetchedDeposits = try? decoder.decode([Deposit].self, from: data) {
-                    self.deposits = fetchedDeposits
-                    self.errorMessage = nil
+                // Try to decode the session to get its ID
+                if let session = try? decoder.decode(Session.self, from: sessionData) {
+                    let sessionId = session.id_session
+                    
+                    // Then fetch deposits for this session
+                    if let depositData = try await fetchData(from: "\(endpoint)session/\(sessionId)", token: authToken) {
+                        // Reuse the same decoder with date strategy
+                        if let fetchedDeposits = try? decoder.decode([Deposit].self, from: depositData) {
+                            self.deposits = fetchedDeposits
+                            self.errorMessage = nil
+                        } else {
+                            self.errorMessage = "Impossible de décoder les dépôts"
+                            self.deposits = []
+                        }
+                    }
+                } else {
+                    self.errorMessage = "Aucune session active trouvée"
+                    self.deposits = []
                 }
             }
         } catch let networkError as NetworkError {

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ClientsListView: View {
     @StateObject var viewModel = ClientViewModel()
+    @State private var showDeleteAlert = false
+    @State private var clientToDelete: Int?
     
     var body: some View {
         NavigationView {
@@ -80,7 +82,7 @@ struct ClientsListView: View {
                                 .padding(.vertical, 6)
                             }
                         }
-                        .onDelete(perform: deleteClient)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -93,6 +95,25 @@ struct ClientsListView: View {
             .task {
                 await viewModel.fetchClients()
             }
+            .alert("Supprimer le client", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let clientID = clientToDelete {
+                        Task {
+                            await viewModel.deleteClient(clientID: clientID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.")
+            }
+        }
+    }
+    
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            clientToDelete = viewModel.clients[index].id_client
+            showDeleteAlert = true
         }
     }
     

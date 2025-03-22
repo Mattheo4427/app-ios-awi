@@ -11,6 +11,8 @@ struct GamesListView: View {
     @StateObject var viewModel = GameViewModel()
     @StateObject private var editorViewModel = GameEditorViewModel()
     @StateObject private var categoryViewModel = GameCategoryViewModel()
+    @State private var showDeleteAlert = false
+    @State private var gameToDelete: Int?
     
     var body: some View {
         NavigationView {
@@ -88,8 +90,6 @@ struct GamesListView: View {
                                                 .lineLimit(2)
                                                 .truncationMode(.tail)
                                                 .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                                .padding(.top, 2)
                                         }
                                     }
                                     .padding(.leading, 8)
@@ -97,7 +97,7 @@ struct GamesListView: View {
                                 .padding(.vertical, 4)
                             }
                         }
-                        .onDelete(perform: deleteGame)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -118,6 +118,18 @@ struct GamesListView: View {
                 await viewModel.fetchGames()
                 await editorViewModel.fetchGameEditors()
                 await categoryViewModel.fetchGameCategories()
+            }
+            .alert("Supprimer le jeu", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let gameID = gameToDelete {
+                        Task {
+                            await viewModel.deleteGame(gameID: gameID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer ce jeu ? Cette action est irréversible.")
             }
             .alert(
                 "Erreur",
@@ -143,12 +155,10 @@ struct GamesListView: View {
         }
     }
     
-    func deleteGame(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let gameID = viewModel.games[index].id_game
-                await viewModel.deleteGame(gameID: gameID)
-            }
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            gameToDelete = viewModel.games[index].id_game
+            showDeleteAlert = true
         }
     }
 }

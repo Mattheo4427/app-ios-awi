@@ -9,6 +9,8 @@ import SwiftUI
 
 struct GameCategoriesListView: View {
     @StateObject var viewModel = GameCategoryViewModel()
+    @State private var showDeleteAlert = false
+    @State private var categoryToDelete: Int?
     
     var body: some View {
         NavigationView {
@@ -43,7 +45,7 @@ struct GameCategoriesListView: View {
                                 }
                             }
                         }
-                        .onDelete(perform: deleteCategory)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -58,15 +60,25 @@ struct GameCategoriesListView: View {
             .task {
                 await viewModel.fetchGameCategories()
             }
+            .alert("Supprimer la catégorie", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let categoryID = categoryToDelete {
+                        Task {
+                            await viewModel.deleteGameCategory(categoryID: categoryID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible.")
+            }
         }
     }
     
-    func deleteCategory(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let categoryID = viewModel.gameCategories[index].id_category
-                await viewModel.deleteGameCategory(categoryID: categoryID)
-            }
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            categoryToDelete = viewModel.gameCategories[index].id_category
+            showDeleteAlert = true
         }
     }
 }

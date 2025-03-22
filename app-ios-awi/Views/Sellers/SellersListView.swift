@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SellersListView: View {
     @StateObject var viewModel = SellerViewModel()
+    @State private var showDeleteAlert = false
+    @State private var sellerToDelete: String?  // Changed from Int? to String?
 
     var body: some View {
         NavigationView {
@@ -84,7 +86,7 @@ struct SellersListView: View {
                                 .padding(.vertical, 6)
                             }
                         }
-                        .onDelete(perform: deleteSeller)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -97,15 +99,25 @@ struct SellersListView: View {
             .task {
                 await viewModel.fetchSellers()
             }
-        }
-    }
-
-    func deleteSeller(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let sellerID = viewModel.sellers[index].id_seller
-                await viewModel.deleteSeller(sellerID: sellerID)
+            .alert("Supprimer le vendeur", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let sellerID = sellerToDelete {
+                        Task {
+                            await viewModel.deleteSeller(sellerID: sellerID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer ce vendeur ? Cette action est irréversible.")
             }
         }
     }
-}
+
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            sellerToDelete = viewModel.sellers[index].id_seller
+            showDeleteAlert = true
+        }
+    }
+} 

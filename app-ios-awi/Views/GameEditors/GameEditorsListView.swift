@@ -4,11 +4,12 @@
 //
 //  Created by etud on 18/03/2025.
 //
-
 import SwiftUI
 
 struct GameEditorsListView: View {
     @StateObject var viewModel = GameEditorViewModel()
+    @State private var showDeleteAlert = false
+    @State private var editorToDelete: Int?
     
     var body: some View {
         NavigationView {
@@ -43,7 +44,7 @@ struct GameEditorsListView: View {
                                 }
                             }
                         }
-                        .onDelete(perform: deleteEditor)
+                        .onDelete(perform: confirmDelete)
                     }
                 }
             }
@@ -56,15 +57,25 @@ struct GameEditorsListView: View {
             .task {
                 await viewModel.fetchGameEditors()
             }
+            .alert("Supprimer l'éditeur", isPresented: $showDeleteAlert) {
+                Button("Annuler", role: .cancel) {}
+                Button("Supprimer", role: .destructive) {
+                    if let editorID = editorToDelete {
+                        Task {
+                            await viewModel.deleteGameEditor(editorID: editorID)
+                        }
+                    }
+                }
+            } message: {
+                Text("Êtes-vous sûr de vouloir supprimer cet éditeur ? Cette action est irréversible.")
+            }
         }
     }
     
-    func deleteEditor(at offsets: IndexSet) {
-        Task {
-            for index in offsets {
-                let editorID = viewModel.gameEditors[index].id_editor
-                await viewModel.deleteGameEditor(editorID: editorID)
-            }
+    func confirmDelete(at offsets: IndexSet) {
+        if let index = offsets.first {
+            editorToDelete = viewModel.gameEditors[index].id_editor
+            showDeleteAlert = true
         }
     }
 }
