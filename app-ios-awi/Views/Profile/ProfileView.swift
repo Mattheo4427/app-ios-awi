@@ -91,6 +91,7 @@ struct ProfileView: View {
             }
         }
     }
+    
 }
 
 struct ProfileDetailsView: View {
@@ -103,6 +104,33 @@ struct ProfileDetailsView: View {
     let address: String?
     let createdAt: String
     let isAdmin: String?
+    
+    // Add local date formatter function
+    private func formatDate(_ dateString: String) -> String {
+        // First try ISO8601 format
+        let isoFormatter = ISO8601DateFormatter()
+        if let date = isoFormatter.date(from: dateString) {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .long
+            formatter.timeStyle = .none
+            formatter.locale = Locale(identifier: "fr_FR")
+            return formatter.string(from: date)
+        }
+        
+        // Fallback to other common date formats
+        let fallbackFormatter = DateFormatter()
+        fallbackFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        if let date = fallbackFormatter.date(from: dateString) {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .long
+            formatter.timeStyle = .none
+            formatter.locale = Locale(identifier: "fr_FR")
+            return formatter.string(from: date)
+        }
+        
+        // Return original if we can't parse it
+        return dateString
+    }
 
     var body: some View {
         VStack(spacing: 10) {
@@ -129,7 +157,8 @@ struct ProfileDetailsView: View {
                 if let address = address {
                     ProfileRow(label: "Adresse", value: address)
                 }
-                ProfileRow(label: "Compte créé le", value: viewModel.formatDate(createdAt))
+                // Use the local formatter instead of viewModel's formatter
+                ProfileRow(label: "Compte créé le", value: formatDate(createdAt))
             }
             .padding(.horizontal)
         }
