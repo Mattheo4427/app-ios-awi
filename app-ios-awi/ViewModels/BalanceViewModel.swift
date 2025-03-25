@@ -64,6 +64,30 @@ class BalanceViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var sellerId: String?
+    
+    // Variables observables pour stocker les statistiques calculées du manager
+    @Published var totalSalesAmount: Double = 0
+    @Published var totalSalesCount: Int = 0
+    @Published var totalCommissions: Double = 0
+    @Published var averageTicket: Double = 0
+    @Published var paymentDistribution: [String: Int] = [:]
+
+    @Published var totalDepositsAmount: Double = 0
+    @Published var totalDepositsCount: Int = 0
+    @Published var totalDepositFees: Double = 0
+    @Published var totalDepositDiscounts: Double = 0
+    @Published var averageDepositAmount: Double = 0
+
+    @Published var totalRecoversAmount: Double = 0
+    @Published var totalRecoversCount: Int = 0
+    
+    // Variables observables pour stocker les statistiques calculées du seller
+    @Published var sellerTotalSalesAmount: Double = 0
+    @Published var sellerTotalSalesCount: Int = 0
+    @Published var sellerTotalCommissions: Double = 0
+    @Published var sellerAverageTicket: Double = 0
+    @Published var sellerPaymentDistribution: [String: Int] = [:]
+    
 
     var isAuthenticated: Bool {
         !authToken.isEmpty
@@ -88,91 +112,180 @@ class BalanceViewModel: ObservableObject {
             print("✅ Token found, user authenticated.")
         }
     }
+    
+    
+    // Méthode pour recalculer les statistiques
+    func computeBalanceStatistics() {
+        guard let sessionBalance = sessionBalance else { return }
+
+        // 🟠 Calculs pour les ventes
+        totalSalesCount = sales.count
+        totalSalesAmount = sales.reduce(0) { $0 + (Double($1.amount) ?? 0) }
+        totalCommissions = sales.reduce(0) { $0 + (Double($1.comission) ?? 0) }
+        averageTicket = totalSalesCount > 0 ? totalSalesAmount / Double(totalSalesCount) : 0
+
+        // Répartition des paiements
+        paymentDistribution = Dictionary(grouping: sales, by: { $0.payment_method })
+            .mapValues { $0.count }
+
+        // 🔵 Calculs pour les dépôts
+        totalDepositsCount = deposits.count
+        totalDepositsAmount = deposits.reduce(0) { $0 + (Double($1.amount) ?? 0) }
+        totalDepositFees = Double(sessionBalance.deposit_fees) ?? 0 * Double(totalDepositsCount)
+        totalDepositDiscounts = Double(sessionBalance.discount) ?? 0 * Double(totalDepositsCount)
+        averageDepositAmount = totalDepositsCount > 0 ? totalDepositsAmount / Double(totalDepositsCount) : 0
+
+        // 🟣 Calculs pour les récupérations
+        totalRecoversCount = recovers.count
+        totalRecoversAmount = recovers.reduce(0) { $0 + (Double($1.amount) ?? 0) }
+    }
+    
+    // Méthode pour recalculer les statistiques pour le Seller
+    func computeSellerStatistics() {
+        // 🟠 Calculs pour les ventes du Seller
+        sellerTotalSalesCount = sales.count
+        sellerTotalSalesAmount = sales.reduce(0) { $0 + (Double($1.amount) ?? 0) }
+        sellerTotalCommissions = sales.reduce(0) { $0 + (Double($1.comission) ?? 0) }
+        sellerAverageTicket = sellerTotalSalesCount > 0 ? sellerTotalSalesAmount / Double(sellerTotalSalesCount) : 0
+
+        // Répartition des paiements
+        sellerPaymentDistribution = Dictionary(grouping: sales, by: { $0.payment_method })
+            .mapValues { $0.count }
+    }
+    
+    var formattedSellerPaymentDistribution: String {
+            let translations: [String: String] = [
+                "cash": "Espèces",
+                "credit_card": "Carte de crédit",
+                "check": "Autres"
+            ]
+            
+            let formatted = sellerPaymentDistribution.map { key, value in
+                let translatedKey = translations[key] ?? key
+                return "\(translatedKey): \(value)"
+            }
+            
+            return formatted.joined(separator: ", ")
+        }
+    
+    var formattedPaymentDistribution: String {
+            let translations: [String: String] = [
+                "cash": "Espèces",
+                "credit_card": "Carte de crédit",
+                "check": "Autres"
+            ]
+            
+            let formatted = paymentDistribution.map { key, value in
+                let translatedKey = translations[key] ?? key
+                return "\(translatedKey): \(value)"
+            }
+            
+            return formatted.joined(separator: ", ")
+        }
+    
+    
+//--Méthodes de fetch--
+    
 
     //Récupère les informations de l'utilisateur
-    func fetchProfile() async {
-        guard isAuthenticated else {
-            DispatchQueue.main.async {
-                self.errorMessage = "No authentication token available."
-            }
-            return
-        }
-
-        let endpoint: String
-        switch userType {
-        case .manager:
-            return  // No need to fetch profile for manager
-        case .seller:
-            endpoint = "sellers/get/current"
-        case .unknown:
-            DispatchQueue.main.async {
-                self.errorMessage = "Unknown user type."
-            }
-            return
-        }
-
-        do {
-            let data = try await fetchData(from: endpoint, token: authToken)
-            if let profile = decodeJSON(from: data, as: SellerProfile.self) {
+    func fetchProfile() async -> String? {
+            guard isAuthenticated else {
                 DispatchQueue.main.async {
-                    self.sellerId = profile.id_seller
-                    print("🟢 Seller ID fetched: \(profile.id_seller)")
+                    self.errorMessage = "No authentication token available."
                 }
-            } else {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Unable to load profile."
-                }
+                return nil
             }
-        } catch {
-            DispatchQueue.main.async {
-                self.errorMessage = "Error loading profile."
-            }
-            print("🔴 Failed to fetch profile: \(error)")
-        }
-    }
 
-    func fetchBalance() async {
-        guard isAuthenticated else {
-            DispatchQueue.main.async {
-                self.errorMessage = "No authentication token available."
-            }
-            return
-        }
-
-        DispatchQueue.main.async {
-            self.isLoading = true
-            self.errorMessage = nil
-        }
-
-        do {
+            let endpoint: String
             switch userType {
             case .manager:
-                try await fetchBalanceForManager()
+                return nil  // No need to fetch profile for manager
             case .seller:
-                guard let sellerId = sellerId else {
-                    DispatchQueue.main.async {
-                        self.errorMessage = "Seller ID not available."
-                    }
-                    return
-                }
-                try await fetchBalanceForSeller(sellerId: sellerId)
+                endpoint = "sellers/get/current"
             case .unknown:
                 DispatchQueue.main.async {
                     self.errorMessage = "Unknown user type."
-                    self.isLoading = false
                 }
+                return nil
             }
-        } catch {
-            DispatchQueue.main.async {
-                self.errorMessage = "Error fetching balance."
+
+            do {
+                let data = try await fetchData(from: endpoint, token: authToken)
+                if let profile = decodeJSON(from: data, as: SellerProfile.self) {
+                    DispatchQueue.main.async {
+                        self.sellerId = profile.id_seller
+                        print("🟢 Seller ID fetched: \(profile.id_seller)")
+                    }
+                    return profile.id_seller
+                } else {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Unable to load profile."
+                    }
+                    return nil
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error loading profile."
+                }
+                print("🔴 Failed to fetch profile: \(error)")
+                return nil
             }
-            print("🔴 Failed to fetch balance: \(error)")
         }
 
-        DispatchQueue.main.async {
-            self.isLoading = false
+    // ✅ Mise à jour automatique après le chargement des données
+    func fetchBalance() async {
+            guard isAuthenticated else {
+                DispatchQueue.main.async {
+                    self.errorMessage = "No authentication token available."
+                }
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.isLoading = true
+                self.errorMessage = nil
+            }
+
+            do {
+                switch userType {
+                case .manager:
+                    try await fetchBalanceForManager()
+                case .seller:
+                    if let sellerId = await fetchProfile() {
+                        print("Seller ID: \(sellerId)")
+                        try await fetchBalanceForSeller(sellerId: sellerId)
+                    } else {
+                        DispatchQueue.main.async {
+                            self.errorMessage = "Seller ID not available."
+                        }
+                    }
+                case .unknown:
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Unknown user type."
+                        self.isLoading = false
+                    }
+                }
+
+                // Appel des calculs une fois les données récupérées
+                DispatchQueue.main.async {
+                    self.computeBalanceStatistics()
+                    if self.userType == .seller {
+                        self.computeSellerStatistics()
+                    }
+                }
+                
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error fetching balance."
+                }
+                print("🔴 Failed to fetch balance: \(error)")
+            }
+
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
         }
-    }
+
 
     private func fetchBalanceForManager() async throws {
         if let sessionData = try await fetchData(from: "sessions/opened", token: authToken),
@@ -196,6 +309,8 @@ class BalanceViewModel: ObservableObject {
     }
 
     private func fetchBalanceForSeller(sellerId: String) async throws {
+        print("Fetching balance for seller ID: \(sellerId)")
+        
         if let salesData = try await fetchData(from: "sales/seller/\(sellerId)", token: authToken) {
             self.sales = decodeJSON(from: salesData, as: [SaleBalance].self) ?? []
         }
@@ -209,6 +324,9 @@ class BalanceViewModel: ObservableObject {
         }
     }
 }
+
+
+//--Structures de vues--
 
 
 //Structure pour une ligne de ventes
@@ -231,6 +349,7 @@ struct SaleRow: View {
         .padding(.vertical, 4)
     }
 }
+
 
 //Structure pour une ligne de dépôts
 struct DepositRow: View {
