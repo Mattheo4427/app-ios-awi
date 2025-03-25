@@ -52,7 +52,7 @@ struct CreateSessionView: View {
             
             Section(header: Text("Paramètres financiers")) {
                 VStack(alignment: .leading) {
-                    Text("Frais de dépôt ($)")
+                    Text("Frais de dépôt (€)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     TextField("Montant", text: $depositFees)
@@ -70,7 +70,7 @@ struct CreateSessionView: View {
                 .padding(.vertical, 4)
                 
                 VStack(alignment: .leading) {
-                    Text("Frais de commission ($)")
+                    Text("Frais de commission (€)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     TextField("Montant", text: $comissionFees)

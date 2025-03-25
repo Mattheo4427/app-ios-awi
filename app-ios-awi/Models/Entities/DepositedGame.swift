@@ -13,14 +13,14 @@ struct DepositedGame: Identifiable, Decodable {
     let forSale: Bool
     let idSession: Int
     let idSeller: String
-    let idGame: Int
+    let id_game: Int
     
     enum CodingKeys: String, CodingKey {
         case tag, price, sold
         case forSale = "for_sale"
         case idSession = "id_session"
         case idSeller = "id_seller"
-        case idGame = "id_game"
+        case id_game = "id_game"
     }
 }
 

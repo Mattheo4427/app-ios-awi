@@ -34,9 +34,19 @@ class SaleViewModel: ObservableObject {
     func createSale(sale: Sale) async {
         do {
             let body = try JSONEncoder().encode(sale)
-            let data = try await fetchData(from: endpoint, reqMethod: "POST", body: body, token: authToken)
+            guard let data = try await fetchData(from: endpoint, reqMethod: "POST", body: body, token: authToken) else {
+                self.errorMessage = "Aucune donnée reçue"
+                return
+            }
             
-            if let newSale: Sale = decodeJSON(from: data, as: Sale.self) {
+            // Try to decode as a success message first
+            if let successResponse = try? JSONDecoder().decode([String: String].self, from: data),
+               let _ = successResponse["data"] {
+                // Success message received - fetch the updated list of sales
+                await fetchSales()
+                self.errorMessage = nil
+            } else if let newSale = decodeJSON(from: data, as: Sale.self) {
+                // Successfully decoded the new sale object
                 self.sales.append(newSale)
                 self.errorMessage = nil
             }
@@ -46,11 +56,11 @@ class SaleViewModel: ObservableObject {
             self.errorMessage = "Erreur: \(error.localizedDescription)"
         }
     }
-    
+        
     func updateSale(sale: Sale) async {
         do {
             let body = try JSONEncoder().encode(sale)
-            let data = try await fetchData(from: "\(endpoint)/\(sale.id_sale)", reqMethod: "PUT", body: body, token: authToken)
+            let data = try await fetchData(from: "\(endpoint)\(sale.id_sale)", reqMethod: "PUT", body: body, token: authToken)
             
             if let updatedSale: Sale = decodeJSON(from: data, as: Sale.self) {
                 if let index = self.sales.firstIndex(where: { $0.id_sale == updatedSale.id_sale }) {
@@ -67,7 +77,7 @@ class SaleViewModel: ObservableObject {
     
     func deleteSale(saleID: String) async {
         do {
-            _ = try await fetchData(from: "\(endpoint)/\(saleID)", reqMethod: "DELETE", token: authToken)
+            _ = try await fetchData(from: "\(endpoint)\(saleID)", reqMethod: "DELETE", token: authToken)
             self.sales.removeAll { $0.id_sale == saleID }
             self.errorMessage = nil
         } catch let networkError as NetworkError {
@@ -97,6 +107,14 @@ class SaleViewModel: ObservableObject {
             self.errorMessage = "Aucune donnée reçue"
         case .decodingError(let message):
             self.errorMessage = "Erreur de décodage: \(message)"
+        }
+    }
+}
+
+extension SaleViewModel {
+    func dismissError() {
+        DispatchQueue.main.async {
+            self.errorMessage = nil
         }
     }
 }

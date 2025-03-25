@@ -21,39 +21,30 @@ struct CreateDepositView: View {
         Double(sellingPrice) ?? 0
     }
     
-    // Commission fee per unit from session
-    var commissionFeePerUnit: Double {
+    // Single commission fee per deposit from session
+    var commissionFee: Double {
         if let session = openedSession, let fee = Double(session.deposit_fees) {
             return fee
         }
         return 0
     }
     
-    // Total commission = quantity × commission fee
-    var computedTotalCommission: Double {
-        computedQuantity * commissionFeePerUnit
-    }
-    
     // Discount = session.discount (%) applied on commission
     var computedDiscountFinal: Double {
         if let session = openedSession, let disc = Double(session.discount) {
-            return disc / 100 * computedTotalCommission
+            return disc / 100 * commissionFee
         }
         return 0
     }
     
     // Final amount the seller pays: commission - discount
     var computedFinalCommission: Double {
-        computedTotalCommission - computedDiscountFinal
+        commissionFee - computedDiscountFinal
     }
     
     // Display helpers with units
     var displayCommissionFee: String {
-        String(format: "%.2f € / unité", commissionFeePerUnit)
-    }
-    
-    var displayTotalCommission: String {
-        String(format: "%.2f €", computedTotalCommission)
+        String(format: "%.2f €", commissionFee)
     }
     
     var displayDiscount: String {
@@ -142,7 +133,7 @@ struct CreateDepositView: View {
             Section(header: Text("Frais de commission")) {
                 // Commission fee display (not editable)
                 VStack(alignment: .leading) {
-                    Text("Commission par unité")
+                    Text("Frais de commission")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text(displayCommissionFee)
@@ -152,7 +143,7 @@ struct CreateDepositView: View {
                 
                 // Commission fee calculation summary
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Commission totale: \(displayTotalCommission)")
+                    Text("Commission: \(displayCommissionFee)")
                     Text("Remise: \(displayDiscount)")
                     Divider()
                     Text("Montant à payer: \(displayFinalCommission)")
@@ -181,7 +172,7 @@ struct CreateDepositView: View {
                                 let newDeposit = CreateDepositDto(
                                     date: Date(),
                                     amount: computedFinalCommission,
-                                    fees: computedTotalCommission,
+                                    fees: commissionFee,
                                     discount: computedDiscountFinal,
                                     id_seller: seller.id_seller,
                                     id_session: session.id_session,
@@ -190,7 +181,7 @@ struct CreateDepositView: View {
                                             id_game: game.id_game,
                                             quantity: Int(quantity) ?? 0,
                                             price: computedSellingPrice, // This is the price for buyers
-                                            nb_for_sale: Int(quantity) ?? 0
+                                            nb_for_sale: 0
                                         )
                                     ]
                                 )

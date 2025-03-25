@@ -176,33 +176,6 @@ struct DepositHeaderView: View {
     }
 }
 
-// Seller information view
-struct SellerInfoView: View {
-    let seller: Seller?
-    
-    var body: some View {
-        if let seller = seller {
-            Label {
-                Text("Vendeur: \(seller.username)")
-                    .font(.subheadline)
-            } icon: {
-                Image(systemName: "person.fill")
-                    .foregroundColor(.secondary)
-            }
-        } else {
-            // Fallback case when seller can't be found
-            Label {
-                Text("Vendeur inconnu")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            } icon: {
-                Image(systemName: "person.fill")
-                    .foregroundColor(.gray)
-            }
-        }
-    }
-}
-
 // Price details view
 struct PriceDetailsView: View {
     let fees: Double

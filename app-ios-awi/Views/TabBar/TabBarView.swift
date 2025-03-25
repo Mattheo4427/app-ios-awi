@@ -40,8 +40,8 @@ struct TabBarView: View {
                 TabItem.MenuItem(icon: "list.bullet", title: "Catégories")
             ],
             "Transactions": [
-                TabItem.MenuItem(icon: "dollarsign.circle", title: "Dépôts"),
-                TabItem.MenuItem(icon: "bag.fill", title: "Ventes"),
+                TabItem.MenuItem(icon: "tray.fill", title: "Dépôts"),
+                TabItem.MenuItem(icon: "cart", title: "Ventes"),
                 TabItem.MenuItem(icon: "arrow.down.circle", title: "Retraits"),
                 TabItem.MenuItem(icon: "chart.bar", title: "Bilan")
             ]

@@ -46,7 +46,7 @@ struct UpdateSessionView: View {
             
             Section(header: Text("Paramètres financiers")) {
                 VStack(alignment: .leading) {
-                    Text("Frais de dépôt ($)")
+                    Text("Frais de dépôt (€)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     TextField("Montant", text: $session.deposit_fees)
@@ -64,7 +64,7 @@ struct UpdateSessionView: View {
                 .padding(.vertical, 4)
                 
                 VStack(alignment: .leading) {
-                    Text("Frais de commission ($)")
+                    Text("Frais de commission (€)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     TextField("Montant", text: $session.comission_fees)
