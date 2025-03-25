@@ -8,25 +8,61 @@
 import SwiftUI
 
 struct BalanceView: View {
+    @StateObject private var viewModel = BalanceViewModel()
+
     var body: some View {
         NavigationView {
             VStack {
-                Spacer()
-                Image(systemName: "chart.bar")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(.green)
-                Text("Bilan")
-                    .font(.largeTitle)
-                    .padding(.top, 16)
-                Text("Les infos du bilan apparaîtront ici.")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                Spacer()
+                if let session = viewModel.sessionBalance, viewModel.userType == .manager {
+                    Text("Bilan de la session \(session.id_session)")
+                        .font(.headline)
+                        .padding(.top, 10)
+                }
+
+                List {
+                    Section(header: Text("Ventes")) {
+                        if viewModel.sales.isEmpty {
+                            Text("Aucune vente enregistrée.")
+                                .foregroundStyle(.gray)
+                        } else {
+                            ForEach(viewModel.sales, id: \.id_sale) { sale in
+                                SaleRow(sale: sale)
+                            }
+                        }
+                    }
+
+                    Section(header: Text("Dépôts")) {
+                        if viewModel.deposits.isEmpty {
+                            Text("Aucun dépôt enregistré.")
+                                .foregroundStyle(.gray)
+                        } else {
+                            ForEach(viewModel.deposits, id: \.id_deposit) { deposit in
+                                DepositRow(deposit: deposit)
+                            }
+                        }
+                    }
+
+                    Section(header: Text("Récupérations")) {
+                        if viewModel.recovers.isEmpty {
+                            Text("Aucune récupération enregistrée.")
+                                .foregroundStyle(.gray)
+                        } else {
+                            ForEach(viewModel.recovers, id: \.id_recover) { recover in
+                                RecoverRow(recover: recover)
+                            }
+                        }
+                    }
+                }
+                .listStyle(.grouped)
             }
             .navigationTitle("Bilan")
+            .onAppear {
+                viewModel.checkAuthState()
+                Task {
+                    await viewModel.fetchProfile()
+                    await viewModel.fetchBalance()
+                }
+            }
         }
     }
 }
