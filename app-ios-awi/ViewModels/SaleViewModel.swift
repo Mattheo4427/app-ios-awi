@@ -184,9 +184,13 @@ class SaleViewModel: ObservableObject {
             self.errorMessage = "Erreur de décodage: \(message)"
         }
     }
-    
-    // Add the dismiss error method
+}
+
+extension SaleViewModel {
     func dismissError() {
-        self.errorMessage = nil
+        DispatchQueue.main.async {
+            self.errorMessage = nil
+        }
     }
 }
+

@@ -157,8 +157,12 @@ class DepositViewModel: ObservableObject {
             self.errorMessage = "Erreur de décodage: \(message)"
         }
     }
-    
+}
+
+extension DepositViewModel {
     func dismissError() {
-        self.errorMessage = nil
+        DispatchQueue.main.async {
+            self.errorMessage = nil
+        }
     }
 }
