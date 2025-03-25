@@ -21,7 +21,7 @@ struct CreateSaleView: View {
     
     @AppStorage("authToken") private var authToken = ""
     
-    let paymentMethods = ["Carte", "Espèces", "Virement"]
+    let paymentMethods = ["Carte", "Espèces", "Autres"]
     
     // Computed property for total price
     var totalPrice: Double {
@@ -469,7 +469,7 @@ struct CreateSaleView: View {
                 return "credit_card"
             case "Espèces":
                 return "cash"
-            case "Virement":
+            case "Autres":
                 return "check"
             default:
                 return method.lowercased()

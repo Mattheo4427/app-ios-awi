@@ -31,14 +31,16 @@ struct DepositedGamesManagerView: View {
     
     var body: some View {
         VStack {
-            // Search bar
+            // Enhanced search bar
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.blue)
+                    .padding(.leading, 8)
                 
                 TextField("Rechercher par ID...", text: $searchText)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
+                    .padding(.vertical, 10)
                 
                 if !searchText.isEmpty {
                     Button(action: {
@@ -46,14 +48,18 @@ struct DepositedGamesManagerView: View {
                     }) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.gray)
+                            .padding(.trailing, 8)
                     }
                 }
             }
-            .padding(8)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.blue.opacity(0.5), lineWidth: 2)
+                    .background(Color(.systemGray6).cornerRadius(10))
+            )
             .padding(.horizontal)
             .padding(.top, 8)
+            .padding(.bottom, 4)
             
             // Game list
             List {

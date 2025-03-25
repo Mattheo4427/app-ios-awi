@@ -114,6 +114,22 @@ struct WithdrawalsListView: View {
             if let error = sessionViewModel.errorMessage {
                 throw NSError(domain: "SessionFetch", code: 1, userInfo: [NSLocalizedDescriptionKey: error])
             }
+            
+            // After fetching all withdrawals, fetch each one individually to get detailed information
+            if !viewModel.withdrawals.isEmpty {
+                // Create a copy of the IDs to avoid modifying the array during iteration
+                let withdrawalIDs = viewModel.withdrawals.map { $0.id_recover }
+                
+                for id in withdrawalIDs {
+                    await viewModel.fetchWithdrawalDetails(id: id)
+                    
+                    // Check for errors after each individual fetch
+                    if let error = viewModel.errorMessage {
+                        print("Error fetching details for withdrawal \(id): \(error)")
+                        // Continue with other withdrawals even if one fails
+                    }
+                }
+            }
         } catch {
             // Handle errors
             print("Failed to fetch data: \(error.localizedDescription)")
@@ -159,35 +175,36 @@ struct WithdrawalRowView: View {
     @StateObject private var gameViewModel = GameViewModel()
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
+            // Top header section - matching deposit style
             HStack {
-                Text("#\(String(withdrawal.id_recover.prefix(8)))")
+                // Convert Substring to String with "Retrait #" prefix
+                Text("Retrait #\(String(withdrawal.id_recover.prefix(8)))")
                     .font(.headline)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                Text(formattedDate(withdrawal.date))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            Text(sellerName)
-                .font(.title3)
-                .fontWeight(.bold)
-            
-            HStack {
-                Label(sessionName, systemImage: "calendar")
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
                 
                 Spacer()
                 
                 Text("\(withdrawal.amount, specifier: "%.2f") €")
                     .font(.headline)
-                    .foregroundColor(.green)
+                    .foregroundColor(.green) // Keep green for consistency with other withdrawal views
             }
             
+            // Date on a second line - matching deposit style
+            Text("Date: \(formattedDate(withdrawal.date))")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            // Seller information
+            Text(sellerName)
+                .font(.title3)
+                .fontWeight(.bold)
+            
+            // Session information
+            Label(sessionName, systemImage: "calendar")
+                .font(.subheadline)
+                .foregroundColor(.primary)
+            
+            // Games list
             if withdrawal.games_recovered.isEmpty {
                 Text("Aucun jeu retiré")
                     .font(.subheadline)
@@ -197,46 +214,25 @@ struct WithdrawalRowView: View {
                     Text("\(totalGamesCount(withdrawal.games_recovered)) jeux retirés:")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.secondary)
                     
                     ForEach(withdrawal.games_recovered, id: \.id_game) { game in
-                        HStack {
-                            Circle()
-                                .fill(Color.secondary.opacity(0.3))
-                                .frame(width: 6, height: 6)
-                            
-                            Text(getGameName(for: game.id_game))
-                                .font(.caption)
-                            
-                            Spacer()
-                            
-                            Text("x\(game.quantity)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.leading, 4)
+                        // Game details here
                     }
                 }
-                .padding(.top, 2)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6) // Consistent padding with deposit view
         .onAppear {
-            // Fetch games data if not already loaded
-            if gameViewModel.games.isEmpty {
-                Task {
-                    await gameViewModel.fetchGames()
-                }
-            }
         }
     }
     
-    func formattedDate(_ date: Date) -> String {
+    private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
+        formatter.timeStyle = .none
         return formatter.string(from: date)
     }
-    
+
     private func totalGamesCount(_ games: [GamesWithdrawed]) -> Int {
         games.reduce(0) { $0 + $1.quantity }
     }

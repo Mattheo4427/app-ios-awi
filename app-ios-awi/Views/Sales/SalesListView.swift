@@ -124,6 +124,7 @@ struct SalesListView: View {
         await viewModel.fetchSales()
         
         if !viewModel.sales.isEmpty {
+            // First fetch all related data
             await withTaskGroup(of: Void.self) { group in
                 group.addTask { await sellerViewModel.fetchSellers() }
                 group.addTask { await gameViewModel.fetchGames() }
@@ -131,6 +132,19 @@ struct SalesListView: View {
                 group.addTask { await sessionViewModel.fetchSessions() }
                 
                 for await _ in group { }
+            }
+            
+            // Then fetch detailed information for each sale
+            let saleIDs = viewModel.sales.compactMap { $0.id_sale }
+            
+            for id in saleIDs {
+                await viewModel.fetchSaleDetails(id: id)
+                
+                // Continue with other sales even if one fetch fails
+                if viewModel.errorMessage != nil {
+                    print("Error fetching details for sale \(id): \(viewModel.errorMessage!)")
+                    viewModel.dismissError() // Clear error to continue with other sales
+                }
             }
         }
         
@@ -235,25 +249,39 @@ struct SaleRowView: View {
     // MARK: - Row Components
     
     private var headerView: some View {
-        HStack {
-            Text(sale.id_seller.count > 8 ? "\(sale.id_seller.prefix(8))..." : sale.id_seller)
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                // Show "Vente #" prefix with ID
+                Text("Vente #\(String(sale.id_sale?.prefix(8) ?? ""))")
+                    .font(.headline)
+                
+                Spacer()
+                
+                Text("\(sale.amount, specifier: "%.2f") €")
+                    .font(.headline)
+                    .foregroundColor(.green)
+            }
             
-            Spacer()
-            
-            Text("\(sale.amount, specifier: "%.2f") €")
-                .font(.headline)
-                .foregroundColor(.green)
+            // Add date on a second line
+            if let date = sale.date {
+                Text("Date: \(formattedDate(date))")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
         }
-        .padding(.bottom, 2)
     }
     
     private var peopleInfoView: some View {
         VStack(alignment: .leading, spacing: 4) {
             if let date = sale.date {
-                Text("Date: \(formattedDate(date))")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                Label {
+                    Text("Date: \(formattedDate(date))")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                } icon: {
+                    Image(systemName: "calendar.badge.clock")
+                        .foregroundColor(.secondary)
+                }
             }
             
             // Seller information
@@ -265,33 +293,55 @@ struct SaleRowView: View {
     }
     
     private var transactionDetailsView: some View {
-        HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             if sale.comission > 0 {
-                Text("Commission: \(sale.comission, specifier: "%.2f") €")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Label {
+                    Text("Commission: \(sale.comission, specifier: "%.2f") €")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                } icon: {
+                    Image(systemName: "percent")
+                        .foregroundColor(.secondary)
+                }
             }
             
             if let paymentMethod = sale.payment_method, !paymentMethod.isEmpty {
-                PaymentBadge(method: paymentMethod)
+                Label {
+                    Text("Paiement: \(formattedPaymentMethod(paymentMethod))")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                } icon: {
+                    Image(systemName: "creditcard")
+                        .foregroundColor(.secondary)
+                }
             }
             
             if let session = session {
-                Text("Session: \(session.name)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Label {
+                    Text("Session: \(session.name)")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                } icon: {
+                    Image(systemName: "calendar")
+                        .foregroundColor(.secondary)
+                }
             } else if let sessionId = sale.id_session {
-                Text("Session: #\(sessionId)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Label {
+                    Text("Session: #\(sessionId)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                } icon: {
+                    Image(systemName: "calendar")
+                        .foregroundColor(.gray)
+                }
             }
         }
     }
     
     private var gamesSoldView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 16) {
             Divider()
-                .padding(.vertical, 4)
+                .padding(.vertical, 10)
             
             HStack {
                 Text("Jeux vendus:")
@@ -304,6 +354,7 @@ struct SaleRowView: View {
                         .padding(.leading, 4)
                 }
             }
+            .padding(.bottom, 8)
             
             // Show either detailed or basic game information
             if let detailedSale = detailedSale {
@@ -312,6 +363,7 @@ struct SaleRowView: View {
                         gameSold: gameDetail,
                         game: gameLookup[gameDetail.id_game]
                     )
+                    .padding(.bottom, 8)
                 }
             } else {
                 ForEach(sale.games_sold, id: \.id_game) { gameSold in
@@ -319,12 +371,26 @@ struct SaleRowView: View {
                         gameSold: gameSold,
                         game: gameLookup[gameSold.id_game]
                     )
+                    .padding(.bottom, 8)
                 }
             }
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .background(Color.gray.opacity(0.03))
+        .cornerRadius(8)
     }
     
     // MARK: - Helper Methods
+    
+    private func formattedPaymentMethod(_ method: String) -> String {
+        switch method.lowercased() {
+        case "credit_card", "card": return "Carte"
+        case "cash": return "Espèces"
+        case "check", "transfer": return "Autres"
+        default: return method
+        }
+    }
     
     /// Look up related data on the main thread to avoid actor isolation issues
     private func lookupRelatedData() {
@@ -454,31 +520,6 @@ struct SaleRowView: View {
     }
 }
 
-// MARK: - Payment Badge Component
-
-struct PaymentBadge: View {
-    let method: String
-    
-    var body: some View {
-        Text("Paiement: \(formattedPaymentMethod(method))")
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(4)
-    }
-    
-    private func formattedPaymentMethod(_ method: String) -> String {
-        switch method.lowercased() {
-        case "credit_card", "card": return "Carte"
-        case "cash": return "Espèces"
-        case "check", "transfer": return "Virement"
-        default: return method
-        }
-    }
-}
-
 // MARK: - People Information Components
 
 struct ClientInfoView: View {
@@ -527,9 +568,6 @@ struct SaleGameInfoView: View {
             if let game = game {
                 Text(game.name)
                     .font(.subheadline)
-                Text("ID: \(game.id_game)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             } else {
                 Text("Jeu inconnu (ID: \(gameSold.id_game))")
                     .font(.subheadline)
@@ -549,27 +587,20 @@ struct DetailedGameInfoView: View {
     let game: Game?
     
     var body: some View {
-        // Force print the tags for debugging
-        let _ = print("DetailedGameInfoView rendering - Game \(gameSold.id_game) with \(gameSold.tags.count) tags: \(gameSold.tags)")
-        
-        return gameCardView {
+        gameCardView {
             // Basic game info
             if let game = game {
                 Text(game.name)
                     .font(.subheadline)
-                Text("ID: \(game.id_game)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             } else {
                 Text("Jeu inconnu (ID: \(gameSold.id_game))")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
             
-            // ALWAYS add the TagsScrollView and force it to be visible with a frame
+            // ALWAYS add the TagsScrollView
             TagsScrollView(tags: gameSold.tags)
                 .frame(minHeight: 30) // Force minimum height to ensure visibility
-                .border(Color.gray.opacity(0.2), width: 0.5) // Add border for debugging
         }
     }
 }
@@ -580,51 +611,38 @@ struct TagsScrollView: View {
     let tags: [String]
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            // Print tags count to debug
-            let _ = print("TagsScrollView received \(tags.count) tags: \(tags)")
-            
+        VStack(alignment: .leading, spacing: 4) {
             if !tags.isEmpty {
                 Text("Tags:")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .padding(.bottom, 2)
+                    .padding(.bottom, 4)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         ForEach(tags, id: \.self) { tag in
-                            // Format tag for display
-                            let displayTag = tag.contains("-") ? 
-                                           "Tag \(tag.prefix(8))..." : 
-                                           tag
-                            
-                            Text(displayTag)
+                            // Display the full tag without truncation
+                            Text(tag)
                                 .font(.caption)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(tagColor(for: tag))
+                                .lineLimit(1)
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Color.gray.opacity(0.1))
                                 .cornerRadius(12)
                         }
                     }
+                    .padding(.bottom, 2)
                 }
+                .frame(minHeight: 34)
             } else {
-                // Show debug info if tags array is empty
                 Text("No tags available")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.top, 2)
             }
         }
-        .padding(.top, 2)
-    }
-    
-    // Generate consistent colors based on tag string
-    private func tagColor(for tag: String) -> Color {
-        // Use hash of tag to generate a consistent color
-        let hash = abs(tag.hashValue)
-        let hue = Double(hash % 12) / 12.0
-        return Color(hue: hue, saturation: 0.7, brightness: 0.9)
+        .padding(.top, 4)
     }
 }
 
@@ -681,7 +699,7 @@ struct DetailedSale: Codable, Identifiable {
     var id_seller: String
     var id_client: Int
     var id_manager: String?
-    var id_session: Int?  // Make optional to handle conditional binding
+    var id_session: Int?
     var games_sold: [DetailedGameSold]
     
     enum CodingKeys: String, CodingKey {
@@ -735,7 +753,6 @@ struct DetailedGameSold: Codable, Identifiable {
         // More robust tag handling
         do {
             tags = try container.decode([String].self, forKey: .tags)
-            print("Decoded tags for game \(id_game): \(tags)")
         } catch {
             print("Error decoding tags: \(error). Setting empty array.")
             tags = []

@@ -67,7 +67,26 @@ class WithdrawalViewModel: ObservableObject {
             self.errorMessage = "Erreur: \(error.localizedDescription)"
         }
     }
-    
+
+    func fetchWithdrawalDetails(id: String) async {
+        do {
+            let data = try await fetchData(from: "recovers/\(id)", token: authToken)
+            
+            if let detailedWithdrawal: Withdrawal = decodeJSON(from: data, as: Withdrawal.self) {
+                // Update the withdrawal in the array with the detailed information
+                if let index = self.withdrawals.firstIndex(where: { $0.id_recover == id }) {
+                    self.withdrawals[index] = detailedWithdrawal
+                }
+                self.errorMessage = nil
+            }
+        } catch let networkError as NetworkError {
+            handleError(networkError)
+        } catch {
+            self.errorMessage = "Erreur: \(error.localizedDescription)"
+            print("Error fetching withdrawal details: \(error)")
+        }
+    }
+        
     func createWithdrawal(withdrawal: Withdrawal) async throws {
         do {
             // Create a request object that matches what the API expects

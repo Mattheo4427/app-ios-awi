@@ -15,7 +15,7 @@ class SessionViewModel: ObservableObject {
     
     @AppStorage("authToken") private var authToken = ""
     @Published var errorMessage: String? = nil
-
+    
     // Fetch all sessions
     func fetchSessions() async {
         do {
@@ -33,7 +33,7 @@ class SessionViewModel: ObservableObject {
                 }
                 throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
             }
-
+            
             if let decodedSessions: [Session] = decodeJSON(from: data, as: [Session].self) {
                 self.sessions = decodedSessions
             }
@@ -41,7 +41,7 @@ class SessionViewModel: ObservableObject {
             print("Failed to fetch sessions: \(error)")
         }
     }
-
+    
     // Create a new session
     func createSession(session: Session) async {
         do {
@@ -60,7 +60,7 @@ class SessionViewModel: ObservableObject {
             self.errorMessage = "Erreur: \(error.localizedDescription)"
         }
     }
-
+    
     // Update an existing session
     func updateSession(session: Session) async {
         do {
@@ -81,7 +81,7 @@ class SessionViewModel: ObservableObject {
             self.errorMessage = "Erreur: \(error.localizedDescription)"
         }
     }
-
+    
     // Delete a session
     func deleteSession(sessionID: Int) async {
         do {
@@ -114,8 +114,12 @@ class SessionViewModel: ObservableObject {
             self.errorMessage = "Erreur de décodage: \(message)"
         }
     }
-    
+}
+
+extension SessionViewModel {
     func dismissError() {
-        self.errorMessage = nil
+        DispatchQueue.main.async {
+            self.errorMessage = nil
+        }
     }
-}	
+}
