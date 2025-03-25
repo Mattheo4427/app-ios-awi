@@ -111,16 +111,9 @@ struct BalanceView: View {
             .onAppear {
                 viewModel.checkAuthState()
                 Task {
-                    await viewModel.fetchProfile()
                     await viewModel.fetchBalance()
                 }
             }
         }
-    }
-}
-
-struct BalanceView_Previews: PreviewProvider {
-    static var previews: some View {
-        BalanceView()
     }
 }

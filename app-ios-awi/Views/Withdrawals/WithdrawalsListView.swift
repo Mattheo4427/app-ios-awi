@@ -216,13 +216,30 @@ struct WithdrawalRowView: View {
                         .fontWeight(.medium)
                     
                     ForEach(withdrawal.games_recovered, id: \.id_game) { game in
-                        // Game details here
+                        HStack {
+                            Circle()
+                                .fill(Color.secondary.opacity(0.3))
+                                .frame(width: 6, height: 6)
+                            
+                            Text(getGameName(for: game.id_game))
+                                .font(.caption)
+                            
+                            Spacer()
+                            
+                            Text("x\(game.quantity)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.leading, 4)
                     }
                 }
             }
         }
         .padding(.vertical, 6) // Consistent padding with deposit view
         .onAppear {
+            Task {
+                await gameViewModel.fetchGames()
+            }
         }
     }
     
